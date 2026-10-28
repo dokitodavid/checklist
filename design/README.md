@@ -27,13 +27,12 @@ A camada não contém controles nem interceptadores de toque; as brasas não sã
 anunciadas por leitores de tela. O relógio Compose respeita a escala de animação
 do sistema e o ciclo de vida. O modo de economia é verificado ao compor a camada.
 
-No widget, `AndroidRemoteViews` incorpora um `ViewFlipper` com 16 quadros vetoriais
-transparentes de cinco brasas, trocados a cada 1,5 segundo. Não usa serviço,
-atualização periódica do widget ou rede para animar. Ao atualizar o widget com
-animações desativadas ou economia de energia ativa, escolhe uma composição estática.
-A animação depende do suporte e das políticas do launcher; sua execução em um
-launcher real ainda precisa ser validada. Os controles de adicionar e concluir
-continuam em Glance. O personagem aparece apenas quando não há pendências.
+No widget, `AndroidRemoteViews` incorpora um `ProgressBar` indeterminado cujo desenho é
+`embers_animated.xml`, um vetor animado com sete brasas que sobem, balançam e acendem/apagam
+de forma contínua. O launcher roda essa animação sozinho: sem serviço, atualização
+periódica ou rede. Com animações desativadas ou economia de energia ativa, o widget usa
+a composição estática `embers_still.xml`. O mago fica sempre no cabeçalho do widget.
+Os controles de adicionar e concluir continuam em Glance.
 
 Todas as imagens são locais. Para uma interface web, copie `favicon.png` para
 seus arquivos públicos e use `<link rel="icon" href="/favicon.png" type="image/png">`.

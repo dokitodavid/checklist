@@ -39,8 +39,8 @@ Kotlin · Jetpack Compose · Material 3
 - Interface **clean**, neutra, com controles arredondados e campo em cápsula.
 - Lista sem cartões; ações de tarefa reunidas no menu ⋮.
 - Mago assassino original em pixel art detalhada no estado vazio e no ícone.
-- Brasas pixeladas discretas atravessam a tela devagar; widget usa animação em quadros,
-  cuja reprodução depende do launcher.
+- Brasas pixeladas atravessam a tela devagar, também no widget, com movimento contínuo.
+- Mago no cabeçalho do widget.
 - Tema escuro fixo, sem verde, com widget na mesma paleta.
 - Artes locais em alta resolução; ícone adaptativo e monocromático para Android 13+.
 - [Guia visual e limites de validação](design/README.md); [favicon PNG](design/favicon.png).

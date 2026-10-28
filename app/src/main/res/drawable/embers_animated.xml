@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Brasas do widget. O launcher anima este vetor dentro de um ProgressBar (layout/widget_embers.xml). -->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector android:width="320dp" android:height="180dp"
+            android:viewportWidth="320" android:viewportHeight="180">
+        <group android:name="rise0">
+            <group android:name="sway0">
+                <path android:name="ember0" android:fillColor="#F2A541" android:fillAlpha="0"
+                    android:pathData="M34,184h3v3h-3z" />
+            </group>
+        </group>
+        <group android:name="rise1">
+            <group android:name="sway1">
+                <path android:name="ember1" android:fillColor="#F2A541" android:fillAlpha="0"
+                    android:pathData="M82,184h2v2h-2z" />
+            </group>
+        </group>
+        <group android:name="rise2">
+            <group android:name="sway2">
+                <path android:name="ember2" android:fillColor="#F2A541" android:fillAlpha="0"
+                    android:pathData="M128,184h3v3h-3z" />
+            </group>
+        </group>
+        <group android:name="rise3">
+            <group android:name="sway3">
+                <path android:name="ember3" android:fillColor="#F2A541" android:fillAlpha="0"
+                    android:pathData="M171,184h2v2h-2z" />
+            </group>
+        </group>
+        <group android:name="rise4">
+            <group android:name="sway4">
+                <path android:name="ember4" android:fillColor="#F2A541" android:fillAlpha="0"
+                    android:pathData="M214,184h3v3h-3z" />
+            </group>
+        </group>
+        <group android:name="rise5">
+            <group android:name="sway5">
+                <path android:name="ember5" android:fillColor="#F2A541" android:fillAlpha="0"
+                    android:pathData="M258,184h2v2h-2z" />
+            </group>
+        </group>
+        <group android:name="rise6">
+            <group android:name="sway6">
+                <path android:name="ember6" android:fillColor="#F2A541" android:fillAlpha="0"
+                    android:pathData="M300,184h3v3h-3z" />
+            </group>
+        </group>
+        </vector>
+    </aapt:attr>
+    <target android:name="rise0">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="translateY" android:valueType="floatType"
+                android:valueFrom="0" android:valueTo="-192" android:duration="11000"
+                android:startOffset="0" android:repeatCount="infinite" android:repeatMode="restart"
+                android:interpolator="@android:interpolator/linear" />
+        </aapt:attr>
+    </target>
+    <target android:name="sway0">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="translateX" android:valueType="floatType"
+                android:valueFrom="-3" android:valueTo="3" android:duration="2400"
+                android:repeatCount="infinite" android:repeatMode="reverse"
+                android:interpolator="@android:interpolator/accelerate_decelerate" />
+        </aapt:attr>
+    </target>
+    <target android:name="ember0">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:duration="11000" android:startOffset="0" android:repeatCount="infinite" android:repeatMode="restart"
+                android:interpolator="@android:interpolator/linear">
+                <propertyValuesHolder android:propertyName="fillAlpha" android:valueType="floatType">
+                    <keyframe android:fraction="0" android:value="0" />
+                    <keyframe android:fraction="0.25" android:value="0.5" />
+                    <keyframe android:fraction="0.7" android:value="0.5" />
+                    <keyframe android:fraction="1" android:value="0" />
+                </propertyValuesHolder>
+            </objectAnimator>
+        </aapt:attr>
+    </target>
+    <target android:name="rise1">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="translateY" android:valueType="floatType"
+                android:valueFrom="0" android:valueTo="-192" android:duration="13500"
+                android:startOffset="4200" android:repeatCount="infinite" android:repeatMode="restart"
+                android:interpolator="@android:interpolator/linear" />
+        </aapt:attr>
+    </target>
+    <target android:name="sway1">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="translateX" android:valueType="floatType"
+                android:valueFrom="-4" android:valueTo="4" android:duration="2700"
+                android:repeatCount="infinite" android:repeatMode="reverse"
+                android:interpolator="@android:interpolator/accelerate_decelerate" />
+        </aapt:attr>
+    </target>
+    <target android:name="ember1">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:duration="13500" android:startOffset="4200" android:repeatCount="infinite" android:repeatMode="restart"
+                android:interpolator="@android:interpolator/linear">
+                <propertyValuesHolder android:propertyName="fillAlpha" android:valueType="floatType">
+                    <keyframe android:fraction="0" android:value="0" />
+                    <keyframe android:fraction="0.25" android:value="0.5" />
+                    <keyframe android:fraction="0.7" android:value="0.5" />
+                    <keyframe android:fraction="1" android:value="0" />
+                </propertyValuesHolder>
+            </objectAnimator>
+        </aapt:attr>
+    </target>
+    <target android:name="rise2">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="translateY" android:valueType="floatType"
+                android:valueFrom="0" android:valueTo="-192" android:duration="10000"
+                android:startOffset="7600" android:repeatCount="infinite" android:repeatMode="restart"
+                android:interpolator="@android:interpolator/linear" />
+        </aapt:attr>
+    </target>
+    <target android:name="sway2">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="translateX" android:valueType="floatType"
+                android:valueFrom="-5" android:valueTo="5" android:duration="3000"
+                android:repeatCount="infinite" android:repeatMode="reverse"
+                android:interpolator="@android:interpolator/accelerate_decelerate" />
+        </aapt:attr>
+    </target>
+    <target android:name="ember2">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:duration="10000" android:startOffset="7600" android:repeatCount="infinite" android:repeatMode="restart"
+                android:interpolator="@android:interpolator/linear">
+                <propertyValuesHolder android:propertyName="fillAlpha" android:valueType="floatType">
+                    <keyframe android:fraction="0" android:value="0" />
+                    <keyframe android:fraction="0.25" android:value="0.5" />
+                    <keyframe android:fraction="0.7" android:value="0.5" />
+                    <keyframe android:fraction="1" android:value="0" />
+                </propertyValuesHolder>
+            </objectAnimator>
+        </aapt:attr>
+    </target>
+    <target android:name="rise3">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="translateY" android:valueType="floatType"
+                android:valueFrom="0" android:valueTo="-192" android:duration="12500"
+                android:startOffset="1900" android:repeatCount="infinite" android:repeatMode="restart"
+                android:interpolator="@android:interpolator/linear" />
+        </aapt:attr>
+    </target>
+    <target android:name="sway3">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="translateX" android:valueType="floatType"
+                android:valueFrom="-3" android:valueTo="3" android:duration="3300"
+                android:repeatCount="infinite" android:repeatMode="reverse"
+                android:interpolator="@android:interpolator/accelerate_decelerate" />
+        </aapt:attr>
+    </target>
+    <target android:name="ember3">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:duration="12500" android:startOffset="1900" android:repeatCount="infinite" android:repeatMode="restart"
+                android:interpolator="@android:interpolator/linear">
+                <propertyValuesHolder android:propertyName="fillAlpha" android:valueType="floatType">
+                    <keyframe android:fraction="0" android:value="0" />
+                    <keyframe android:fraction="0.25" android:value="0.5" />
+                    <keyframe android:fraction="0.7" android:value="0.5" />
+                    <keyframe android:fraction="1" android:value="0" />
+                </propertyValuesHolder>
+            </objectAnimator>
+        </aapt:attr>
+    </target>
+    <target android:name="rise4">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="translateY" android:valueType="floatType"
+                android:valueFrom="0" android:valueTo="-192" android:duration="14000"
+                android:startOffset="9800" android:repeatCount="infinite" android:repeatMode="restart"
+                android:interpolator="@android:interpolator/linear" />
+        </aapt:attr>
+    </target>
+    <target android:name="sway4">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="translateX" android:valueType="floatType"
+                android:valueFrom="-4" android:valueTo="4" android:duration="3600"
+                android:repeatCount="infinite" android:repeatMode="reverse"
+                android:interpolator="@android:interpolator/accelerate_decelerate" />
+        </aapt:attr>
+    </target>
+    <target android:name="ember4">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:duration="14000" android:startOffset="9800" android:repeatCount="infinite" android:repeatMode="restart"
+                android:interpolator="@android:interpolator/linear">
+                <propertyValuesHolder android:propertyName="fillAlpha" android:valueType="floatType">
+                    <keyframe android:fraction="0" android:value="0" />
+                    <keyframe android:fraction="0.25" android:value="0.5" />
+                    <keyframe android:fraction="0.7" android:value="0.5" />
+                    <keyframe android:fraction="1" android:value="0" />
+                </propertyValuesHolder>
+            </objectAnimator>
+        </aapt:attr>
+    </target>
+    <target android:name="rise5">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="translateY" android:valueType="floatType"
+                android:valueFrom="0" android:valueTo="-192" android:duration="10500"
+                android:startOffset="5600" android:repeatCount="infinite" android:repeatMode="restart"
+                android:interpolator="@android:interpolator/linear" />
+        </aapt:attr>
+    </target>
+    <target android:name="sway5">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="translateX" android:valueType="floatType"
+                android:valueFrom="-5" android:valueTo="5" android:duration="3900"
+                android:repeatCount="infinite" android:repeatMode="reverse"
+                android:interpolator="@android:interpolator/accelerate_decelerate" />
+        </aapt:attr>
+    </target>
+    <target android:name="ember5">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:duration="10500" android:startOffset="5600" android:repeatCount="infinite" android:repeatMode="restart"
+                android:interpolator="@android:interpolator/linear">
+                <propertyValuesHolder android:propertyName="fillAlpha" android:valueType="floatType">
+                    <keyframe android:fraction="0" android:value="0" />
+                    <keyframe android:fraction="0.25" android:value="0.5" />
+                    <keyframe android:fraction="0.7" android:value="0.5" />
+                    <keyframe android:fraction="1" android:value="0" />
+                </propertyValuesHolder>
+            </objectAnimator>
+        </aapt:attr>
+    </target>
+    <target android:name="rise6">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="translateY" android:valueType="floatType"
+                android:valueFrom="0" android:valueTo="-192" android:duration="12000"
+                android:startOffset="3100" android:repeatCount="infinite" android:repeatMode="restart"
+                android:interpolator="@android:interpolator/linear" />
+        </aapt:attr>
+    </target>
+    <target android:name="sway6">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="translateX" android:valueType="floatType"
+                android:valueFrom="-3" android:valueTo="3" android:duration="4200"
+                android:repeatCount="infinite" android:repeatMode="reverse"
+                android:interpolator="@android:interpolator/accelerate_decelerate" />
+        </aapt:attr>
+    </target>
+    <target android:name="ember6">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:duration="12000" android:startOffset="3100" android:repeatCount="infinite" android:repeatMode="restart"
+                android:interpolator="@android:interpolator/linear">
+                <propertyValuesHolder android:propertyName="fillAlpha" android:valueType="floatType">
+                    <keyframe android:fraction="0" android:value="0" />
+                    <keyframe android:fraction="0.25" android:value="0.5" />
+                    <keyframe android:fraction="0.7" android:value="0.5" />
+                    <keyframe android:fraction="1" android:value="0" />
+                </propertyValuesHolder>
+            </objectAnimator>
+        </aapt:attr>
+    </target>
+</animated-vector>

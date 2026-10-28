@@ -115,6 +115,12 @@ private fun WidgetContent(tasks: List<Task>) {
             modifier = GlanceModifier.fillMaxWidth().padding(start = 4.dp, bottom = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            Image(
+                provider = ImageProvider(R.drawable.ashen_companion),
+                contentDescription = "Mago assassino",
+                modifier = GlanceModifier.size(32.dp, 48.dp).clickable(openApp),
+            )
+            Spacer(GlanceModifier.width(8.dp))
             Column(modifier = GlanceModifier.defaultWeight().clickable(openApp)) {
                 Text(
                     text = "Checklist",
@@ -159,7 +165,6 @@ private fun WidgetContent(tasks: List<Task>) {
                 contentAlignment = Alignment.Center,
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Image(ImageProvider(R.drawable.ashen_companion), "Mago assassino", modifier = GlanceModifier.size(60.dp))
                 Text(
                     text = "Nada pendente",
                     style = TextStyle(fontSize = 14.sp, color = ColorProvider(AshenColors.Muted)),
