@@ -55,8 +55,9 @@ O APK é gerado pelo GitHub Actions — não precisa do Android Studio.
 3. Aba **Releases** → baixe o `Checklist.apk` pelo celular e instale
    (o Android pede para permitir “fontes desconhecidas”).
 
-Cada build com sucesso na `main` gera uma release nova (`v1`, `v2`, …);
-builds que falham não pulam número. Também dá pra rodar manualmente em
+Cada build com sucesso na `main` gera uma release nova (`1.0`, `1.1`, `1.2`, …);
+builds que falham não pulam número. Para começar a `2.0`, mude `VERSAO_PRINCIPAL`
+em `.github/workflows/build.yml`. Também dá pra rodar manualmente em
 **Actions → Build APK → Run workflow**.
 
 Para atualizar o app, baixe o APK da release nova e instale por cima.

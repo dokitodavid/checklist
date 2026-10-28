@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+env:
+  # Mude para 2 quando quiser começar a 2.0 (a próxima release sai como 2.0, depois 2.1…)
+  VERSAO_PRINCIPAL: 1
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,10 +20,14 @@ jobs:
         with:
           fetch-depth: 0 # traz as tags, usadas para numerar a versão
 
-      # Próxima versão = número de releases já publicadas + 1 (builds que falham não contam)
+      # Nome: VERSAO_PRINCIPAL.N, onde N = releases já publicadas nessa versão principal (1.0, 1.1…)
+      # Código: total de releases + 1 (o Android exige um número inteiro que sempre cresce)
+      # Builds que falham não geram tag, então não pulam número.
       - name: Definir versão
         id: versao
-        run: echo "numero=$(( $(git tag -l 'v*' | wc -l) + 1 ))" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "codigo=$(( $(git tag -l 'v*' | wc -l) + 1 ))" >> "$GITHUB_OUTPUT"
+          echo "nome=$VERSAO_PRINCIPAL.$(git tag -l "v$VERSAO_PRINCIPAL.*" | wc -l)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-java@v4
         with:
@@ -31,7 +39,7 @@ jobs:
       - name: Compilar APK
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon -Pversao=${{ steps.versao.outputs.numero }}
+          ./gradlew assembleRelease --no-daemon -PversionCode=${{ steps.versao.outputs.codigo }} -PversionName=${{ steps.versao.outputs.nome }}
           cp app/build/outputs/apk/release/app-release.apk Checklist.apk
 
       # Lista os commits desde a última release (ignora os marcados com [skip ci])
@@ -45,7 +53,7 @@ jobs:
       - name: Publicar na aba Releases
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.versao.outputs.numero }}
-          name: Checklist v${{ steps.versao.outputs.numero }}
+          tag_name: v${{ steps.versao.outputs.nome }}
+          name: Checklist ${{ steps.versao.outputs.nome }}
           body_path: notas.md
           files: Checklist.apk
