@@ -42,6 +42,8 @@ import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import com.dkt.todo.data.Task
+import com.dkt.todo.data.TaskStore
 
 /** Chaves dos parâmetros passados pelos botões do widget. */
 val TaskIdKey = ActionParameters.Key<Long>("taskId")
