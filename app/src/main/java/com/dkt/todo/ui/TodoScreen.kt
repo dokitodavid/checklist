@@ -4,8 +4,6 @@ import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -18,7 +16,6 @@ import com.dkt.todo.R
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +29,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -47,13 +43,9 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -105,6 +97,7 @@ fun TodoScreen(
     onFilterChange: (Filter) -> Unit,
     focusTick: Int = 0,
     onBack: () -> Unit = {},
+    onTaskCompleted: () -> Unit = {},
 ) {
     var tasks by remember { mutableStateOf(store.load()) }
     var input by rememberSaveable { mutableStateOf("") }
@@ -174,6 +167,8 @@ fun TodoScreen(
     }
 
     fun toggle(task: Task) {
+        // A onda só toca ao concluir de verdade (não ao reabrir)
+        if (!task.done) onTaskCompleted()
         store.logDone(if (task.done) -1 else 1)
         update(tasks.map { if (it.id == task.id) it.copy(done = !it.done) else it })
     }
@@ -301,11 +296,8 @@ fun TodoScreen(
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         Box(Modifier.padding(padding).fillMaxSize()) {
-        // Mago grande ao fundo, mais transparente para não atrapalhar a leitura
-        AshenCompanion(
-            Modifier.align(Alignment.Center).size(220.dp, 330.dp),
-            alpha = 0.22f,
-        )
+        // Cenário de ruínas ao fundo, preso à tela; a lista rola na frente
+        RuinsBackground()
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp),

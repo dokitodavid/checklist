@@ -42,10 +42,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.dkt.todo.R
 import com.dkt.todo.data.DayActivity
 import com.dkt.todo.data.TaskStore
 import com.dkt.todo.ui.theme.AshenColors
@@ -110,18 +113,8 @@ fun ActivityScreen(store: TaskStore, onOpenList: (Filter) -> Unit, onAddTask: ()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Mago em destaque, com o brilho da brasa atrás
-            Box(Modifier.fillMaxWidth().height(300.dp), contentAlignment = Alignment.Center) {
-                Box(
-                    Modifier
-                        .size(280.dp)
-                        .background(
-                            Brush.radialGradient(listOf(AshenColors.Ember.copy(alpha = 0.18f), Color.Transparent)),
-                            CircleShape,
-                        )
-                )
-                AshenCompanion(Modifier.size(196.dp, 294.dp))
-            }
+            // Mago em destaque diante do cenário de ruínas, de borda a borda da tela
+            HeroScene(Modifier.fullBleed(16.dp).height(300.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ListShortcut("Todas", tasks.size, Modifier.weight(1f)) { onOpenList(Filter.ALL) }
@@ -335,3 +328,50 @@ fun streak(activity: Map<LocalDate, DayActivity>, today: LocalDate): Int {
 }
 
 private fun plural(n: Int, one: String, many: String) = "$n ${if (n == 1) one else many}"
+
+/** Largura do mago na tela principal. */
+private val HeroMageWidth = 196.dp
+
+/**
+ * Cenário estendido atrás do mago. O cenário ocupa a largura toda (FillWidth, sem esticar)
+ * e as bordas somem em degradê na cor de fundo; o mago fica na frente. A capa do mago é
+ * assimétrica, então só ele é deslocado 15% da própria largura para a esquerda, para o capuz
+ * e o tronco ficarem no eixo da tela e do portal da catedral.
+ */
+@Composable
+private fun HeroScene(modifier: Modifier = Modifier) {
+    val bg = MaterialTheme.colorScheme.background
+    Box(modifier, contentAlignment = Alignment.Center) {
+        SceneryImage(
+            R.drawable.ruins_hero,
+            Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillWidth,
+            alpha = 0.65f,
+        )
+        Box(
+            Modifier.fillMaxSize().background(
+                Brush.verticalGradient(0f to bg, 0.2f to Color.Transparent, 0.72f to Color.Transparent, 1f to bg)
+            )
+        )
+        Box(
+            Modifier.fillMaxSize().background(
+                Brush.horizontalGradient(0f to bg, 0.12f to Color.Transparent, 0.88f to Color.Transparent, 1f to bg)
+            )
+        )
+        AshenCompanion(
+            Modifier
+                .offset(x = -HeroMageWidth * 0.15f)
+                .size(HeroMageWidth, HeroMageWidth * 1.5f)
+        )
+    }
+}
+
+/** Ignora o recuo horizontal do pai ([padding] de cada lado) para ocupar a largura da tela. */
+private fun Modifier.fullBleed(padding: Dp): Modifier = layout { measurable, constraints ->
+    val extra = (padding * 2).roundToPx()
+    val width = constraints.maxWidth + extra
+    val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
+    layout(constraints.maxWidth, placeable.height) {
+        placeable.place(-padding.roundToPx(), 0)
+    }
+}

@@ -36,7 +36,7 @@ reagendados sozinhos depois de reiniciar o celular ou atualizar o app.
 ### Widget da tela inicial
 
 - Quadro de atividade no estilo do GitHub (últimas 16 semanas, tarefas criadas + feitas),
-  com o dia de hoje contornado e o mago translúcido ao fundo.
+  com o dia de hoje contornado e o cenário de ruínas ao fundo.
 - Mostra quantas estão pendentes, quantas foram feitas hoje e a sequência de dias.
 - Botão **+** abre o app já com o teclado pronto para digitar; tocar no resto abre o app.
 - Atualiza sozinho quando algo muda no app (e vice-versa).
@@ -46,8 +46,9 @@ reagendados sozinhos depois de reiniciar o celular ou atualizar o app.
 
 - Interface **clean**, neutra, com controles arredondados e campo em cápsula.
 - Lista sem cartões; gestos para concluir, excluir e reordenar, e o resto no menu ⋮.
-- Mago assassino original em pixel art: em destaque na Atividade, grande e translúcido ao fundo das listas, no widget e no ícone.
-- Brasas pixeladas atravessam a tela devagar, também no widget, com movimento contínuo.
+- Mago assassino original em pixel art, em destaque na Atividade diante de um cenário de ruínas, e no ícone.
+- Listas com cenário vertical de ruínas discreto ao fundo; widget com o cenário, sem personagem.
+- Ao concluir uma tarefa, uma onda de quadradinhos cinza se espalha pela tela.
 - Tema escuro fixo, sem verde, com widget na mesma paleta.
 - Artes locais em alta resolução; ícone adaptativo e monocromático para Android 13+.
 - [Guia visual e limites de validação](design/README.md); [favicon PNG](design/favicon.png).
@@ -102,7 +103,7 @@ celular conectado (depuração USB ativada).
 ```
 app/src/main/java/com/dkt/todo/
 ├── MainActivity.kt        # Activity; trata o atalho "+" do widget
-├── TarefasWidget.kt       # Widget (Glance): quadro de atividade, mago e botão +
+├── TarefasWidget.kt       # Widget (Glance): quadro de atividade, cenário e botão +
 ├── Reminders.kt           # Lembretes: alarmes, notificação e reagendar ao reiniciar
 ├── data/
 │   ├── Task.kt            # Modelo da tarefa
@@ -111,13 +112,14 @@ app/src/main/java/com/dkt/todo/
 └── ui/
     ├── ChecklistApp.kt    # Navegação entre lista e atividade
     ├── SwipeableTask.kt   # Arrastar para os lados: concluir / excluir
-    ├── ScreenHeader.kt    # Cabeçalho com o mago
+    ├── ScreenHeader.kt    # Cabeçalho (título, subtítulo, ações)
     ├── TodoScreen.kt      # Tela principal: lista, filtros, campo, menu
     ├── ActivityScreen.kt  # Atividade: quadro de dias e totais
     ├── TaskRow.kt         # Linha da tarefa
     ├── EditTaskDialog.kt  # Diálogo de edição
     ├── PixelArt.kt        # Personagem e ícones de ação
-    ├── AmbientEmbers.kt   # Brasas decorativas na tela
+    ├── Scenery.kt         # Cenários de ruínas (fundo)
+    ├── TaskCompletionWave.kt # Onda ao concluir uma tarefa
     └── theme/Theme.kt     # Paleta, tipografia e formas
 
 app/src/main/res/

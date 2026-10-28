@@ -17,7 +17,7 @@ object AshenColors {
     val Stone = Color(0xFF212121)
     val Raised = Color(0xFF303030)
     val Border = Color(0xFF454545)
-    val Ember = Color(0xFFF2A541) // Exclusivo das brasas decorativas.
+    val Ember = Color(0xFFF2A541) // Âmbar do quadro de atividade
     val Gold = Color(0xFFECECEC)
     val Parchment = Color(0xFFECECEC)
     val Muted = Color(0xFFA0A0A0)

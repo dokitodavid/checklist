@@ -2,12 +2,16 @@ package com.dkt.todo.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
@@ -27,6 +31,9 @@ fun ChecklistApp(store: TaskStore, focusTick: Int) {
     // Cada pedido de "nova tarefa" (widget ou Atividade) abre a lista com o teclado
     var focusRequests by rememberSaveable { mutableIntStateOf(0) }
     val states = rememberSaveableStateHolder()
+    // Quantas tarefas foram concluídas nesta abertura do app; cada aumento dispara a onda.
+    // Não é salvo: ao abrir, restaurar ou voltar de outra tela, a onda não toca.
+    var completions by remember { mutableIntStateOf(0) }
 
     fun openList(f: Filter, focus: Boolean = false) {
         filter = f
@@ -54,10 +61,12 @@ fun ChecklistApp(store: TaskStore, focusTick: Int) {
                         onFilterChange = { filter = it },
                         focusTick = focusRequests,
                         onBack = { screen = Screen.ACTIVITY },
+                        onTaskCompleted = { completions++ },
                     )
                 }
             }
         }
-        AmbientEmbers(Modifier.matchParentSize())
+        // Onda de conclusão por cima de tudo, fora das barras do sistema e do teclado
+        TaskCompletionWave(completions, Modifier.matchParentSize().windowInsetsPadding(WindowInsets.safeDrawing))
     }
 }

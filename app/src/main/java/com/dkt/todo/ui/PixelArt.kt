@@ -1,12 +1,10 @@
 package com.dkt.todo.ui
 
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,19 +18,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.dkt.todo.R
-import com.dkt.todo.ui.theme.AshenColors
-import kotlin.math.sin
 
 // Os controles são discretos; a arte detalhada é o foco da identidade.
 enum class PixelSymbol { Check, Star, Trash, Plus }
@@ -47,15 +40,6 @@ fun PixelIcon(symbol: PixelSymbol, description: String?, modifier: Modifier = Mo
             PixelSymbol.Plus -> Icons.Filled.Add
         },
         contentDescription = description, modifier = modifier.size(21.dp), tint = tint,
-    )
-}
-
-@Composable
-fun CompanionEmblem(modifier: Modifier = Modifier) {
-    Image(
-        painterResource(R.drawable.ic_launcher_portrait),
-        contentDescription = "Capuz do mago assassino",
-        modifier = modifier, contentScale = ContentScale.Fit,
     )
 }
 

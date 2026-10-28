@@ -4,8 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.os.PowerManager
-import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,12 +17,10 @@ import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.Image
 import androidx.glance.ImageProvider
-import androidx.glance.LocalContext
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
-import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.appWidgetBackground
@@ -90,28 +86,25 @@ class TarefasWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = TarefasWidget()
 }
 
-/** Quadro de atividade (estilo GitHub) com o mago translúcido ao fundo e as brasas por cima. */
+/** Quadro de atividade (estilo GitHub) com o cenário de ruínas ao fundo, sem personagem. */
 @Composable
 private fun WidgetContent(tasks: List<Task>, activity: Map<LocalDate, DayActivity>) {
-    val context = LocalContext.current
     val today = LocalDate.now()
     val pending = tasks.count { !it.done }
     val doneToday = activity[today]?.done ?: 0
     val streak = streak(activity, today)
     val heatmap = remember(activity, today) { heatmapBitmap(activity, today, WIDGET_WEEKS) }
     val openApp = actionStartActivity<MainActivity>()
-    val batterySaver = (context.getSystemService(Context.POWER_SERVICE) as PowerManager).isPowerSaveMode
 
     Box(GlanceModifier.fillMaxSize().appWidgetBackground().background(ColorProvider(AshenColors.Night)).cornerRadius(20.dp)) {
-        // Mago ao fundo, já com a transparência aplicada na imagem
-        Box(GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Image(
-                provider = ImageProvider(R.drawable.companion_widget_bg),
-                contentDescription = null,
-                modifier = GlanceModifier.fillMaxSize(),
-                contentScale = ContentScale.Fit,
-            )
-        }
+        // Cenário de fundo, já esmaecido na própria imagem (25% sobre o cinza do widget), para
+        // não apagar textos e botões com transparência no widget inteiro
+        Image(
+            provider = ImageProvider(R.drawable.ruins_widget_bg),
+            contentDescription = null,
+            modifier = GlanceModifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+        )
         Column(GlanceModifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 10.dp)) {
             Row(
                 modifier = GlanceModifier.fillMaxWidth().padding(start = 4.dp, bottom = 6.dp),
@@ -161,10 +154,6 @@ private fun WidgetContent(tasks: List<Task>, activity: Map<LocalDate, DayActivit
                 style = TextStyle(fontSize = 12.sp, color = ColorProvider(AshenColors.Muted)),
             )
         }
-        AndroidRemoteViews(
-            remoteViews = RemoteViews(context.packageName, if (batterySaver) R.layout.widget_embers_still else R.layout.widget_embers),
-            modifier = GlanceModifier.fillMaxSize(),
-        )
     }
 }
 
