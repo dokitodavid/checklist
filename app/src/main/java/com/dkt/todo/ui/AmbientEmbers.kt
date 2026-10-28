@@ -12,62 +12,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.FilterQuality
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.imageResource
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.dkt.todo.R
+import com.dkt.todo.ui.theme.AshenColors
 import kotlin.math.PI
-import kotlin.math.roundToInt
 import kotlin.math.sin
 
-/** Quadros da chama de cada brasa: 64 a 50 FPS (design/brasas/animacao.json). */
-private const val FRAMES = 64
-private const val FRAME_MS = 20
-private const val CYCLE_MS = 72_000
+private const val CYCLE_MS = 24_000
 
-/**
- * Uma brasa: qual arte usa, onde sobe (fração da largura), tamanho do pixel da arte em dp,
- * quantas voltas dá por ciclo (velocidade), defasagem e inclinação/giro em graus.
- */
-private class Ember(
-    val sprite: Int,
-    val x: Float,
-    val pixelDp: Float,
-    val laps: Int,
-    val offset: Float,
-    val tilt: Float,
-    val swing: Float,
-)
-
-private val embers = listOf(
-    // Arte de ~45×64 px; cada pixel com 0,25–0,35 dp (brasas de ~16–22 dp de altura)
-    Ember(0, 0.08f, 0.35f, 3, 0.00f, -4f, 6f),
-    Ember(2, 0.22f, 0.30f, 4, 0.55f, 8f, 8f),
-    Ember(1, 0.36f, 0.32f, 5, 0.20f, 0f, 6f),
-    Ember(3, 0.50f, 0.30f, 4, 0.80f, -6f, 8f),
-    Ember(4, 0.63f, 0.28f, 3, 0.35f, 10f, 10f),
-    Ember(0, 0.77f, 0.25f, 5, 0.65f, 4f, 6f),
-    Ember(2, 0.91f, 0.28f, 4, 0.10f, -8f, 8f),
-)
-
-/** Camada decorativa sem interceptar toques ou criar elementos de acessibilidade. */
+/** Sete pixels âmbar que sobem a tela devagar, acendendo e apagando. */
 @Composable
 fun AmbientEmbers(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     if ((context.getSystemService(Context.POWER_SERVICE) as PowerManager).isPowerSaveMode) return
-    val sprites: List<ImageBitmap> = listOf(
-        // Tiras com os 64 quadros da chama lado a lado: gota, fina, curvada, bifurcada, fragmento
-        ImageBitmap.imageResource(R.drawable.ember_drop_frames),
-        ImageBitmap.imageResource(R.drawable.ember_thin_frames),
-        ImageBitmap.imageResource(R.drawable.ember_curved_frames),
-        ImageBitmap.imageResource(R.drawable.ember_forked_frames),
-        ImageBitmap.imageResource(R.drawable.ember_shard_frames),
-    )
     // Relógio próprio, a cada quadro da tela. Não usa as animações do Compose porque elas
     // param quando a escala de duração do Animator do sistema está zerada (alguns modos de
     // bateria/desempenho fazem isso), e as brasas devem se mexer sempre.
@@ -77,36 +35,19 @@ fun AmbientEmbers(modifier: Modifier = Modifier) {
         while (true) withFrameMillis { clockMs = it - start }
     }
     Canvas(modifier) {
-        // Ciclo de 72 s; cada brasa dá 3, 4 ou 5 voltas nele (24, 18 ou 14,4 s para atravessar a tela)
         val phase = (clockMs % CYCLE_MS) / CYCLE_MS.toFloat()
-        embers.forEach { e ->
-            val p = (phase * e.laps + e.offset) % 1f
-            val img = sprites[e.sprite]
-            val frameW = img.width / FRAMES
-            // Chama: troca de quadro a cada 20 ms; cada brasa começa num quadro diferente
-            val frame = ((clockMs / FRAME_MS).toInt() + (e.offset * FRAMES).toInt()) % FRAMES
-            val px = e.pixelDp.dp.toPx()
-            val w = frameW * px
-            val h = img.height * px
-            val cx = size.width * e.x + sin(p * 4 * PI).toFloat() * 8.dp.toPx()
-            val cy = size.height + h - p * (size.height + 2 * h)
-            // Acende rápido ao entrar e vai se apagando aos poucos na segunda metade da subida
-            val alpha = 0.6f * when {
-                p < 0.1f -> p / 0.1f
-                p < 0.4f -> 1f
-                else -> (1f - (p - 0.4f) / 0.6f).let { it * it }
-            }
-            rotate(e.tilt + sin(p * 3 * PI).toFloat() * e.swing, pivot = Offset(cx, cy)) {
-                drawImage(
-                    image = img,
-                    srcOffset = IntOffset(frame * frameW, 0),
-                    srcSize = IntSize(frameW, img.height),
-                    dstOffset = IntOffset((cx - w / 2).roundToInt(), (cy - h / 2).roundToInt()),
-                    dstSize = IntSize(w.roundToInt(), h.roundToInt()),
-                    alpha = alpha,
-                    filterQuality = FilterQuality.None,
-                )
-            }
+        val pixel = 1.dp.toPx()
+        repeat(7) { i ->
+            val p = (phase + i / 7f) % 1f
+            val x = size.width * ((0.12f + i * 0.137f + sin(p * 2 * PI).toFloat() * 0.025f) % 1f)
+            val y = size.height * (1.04f - p * 1.12f)
+            val alpha = sin(p * PI).toFloat().coerceAtLeast(0f) * 0.5f
+            // Posição contínua (sem prender à grade de pixels) para o movimento ficar fluido
+            drawRect(
+                AshenColors.Ember.copy(alpha = alpha),
+                Offset(x, y),
+                Size(pixel * (if (i % 3 == 0) 3 else 2), pixel * 3),
+            )
         }
     }
 }
