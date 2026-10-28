@@ -1,10 +1,25 @@
 {
-  "frame_width": 256,
-  "frame_height": 256,
-  "frames": 24,
-  "duration_ms": 80,
-  "loop": true,
-  "spritesheet_columns": 8,
-  "spritesheet_rows": 3,
-  "motion": "flicker and local flame-tip variation only; no particle travel"
+  "rising": {
+    "fps": 50,
+    "timeline_frames": 256,
+    "duration_ms": 20,
+    "cycle_ms": 5120,
+    "width": 192,
+    "height": 384
+  },
+  "local_flame_atlas": {
+    "columns": 8,
+    "rows": 8,
+    "frames": 64,
+    "fps": 50,
+    "frame_width": 128,
+    "frame_height": 160
+  },
+  "variants": [
+    "01-gota",
+    "02-fina",
+    "03-curvada",
+    "04-bifurcada",
+    "05-fragmento"
+  ]
 }

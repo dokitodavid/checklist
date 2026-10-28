@@ -25,9 +25,9 @@ import kotlin.math.PI
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
-/** Quadros de cintilação de cada arte (design/brasas/animacao.json). */
-private const val FRAMES = 24
-private const val FRAME_MS = 80
+/** Quadros da chama de cada brasa: 64 a 50 FPS (design/brasas/animacao.json). */
+private const val FRAMES = 64
+private const val FRAME_MS = 20
 private const val CYCLE_MS = 72_000
 
 /**
@@ -45,14 +45,14 @@ private class Ember(
 )
 
 private val embers = listOf(
-    // Cada pixel da arte com 0,55–0,7 dp (≈2 px de tela): abaixo disso a cintilação some
-    Ember(0, 0.08f, 0.70f, 3, 0.00f, -6f, 10f),
-    Ember(2, 0.22f, 0.56f, 4, 0.55f, 12f, 14f),
-    Ember(1, 0.36f, 0.55f, 5, 0.20f, 0f, 18f),
-    Ember(0, 0.50f, 0.62f, 4, 0.80f, 8f, 8f),
-    Ember(2, 0.63f, 0.52f, 3, 0.35f, -14f, 12f),
-    Ember(1, 0.77f, 0.52f, 5, 0.65f, 6f, 16f),
-    Ember(0, 0.91f, 0.66f, 4, 0.10f, -10f, 10f),
+    // Arte de ~45×64 px; cada pixel com 0,42–0,55 dp para a chama aparecer bem
+    Ember(0, 0.08f, 0.55f, 3, 0.00f, -4f, 6f),
+    Ember(2, 0.22f, 0.48f, 4, 0.55f, 8f, 8f),
+    Ember(1, 0.36f, 0.50f, 5, 0.20f, 0f, 6f),
+    Ember(3, 0.50f, 0.50f, 4, 0.80f, -6f, 8f),
+    Ember(4, 0.63f, 0.46f, 3, 0.35f, 10f, 10f),
+    Ember(0, 0.77f, 0.42f, 5, 0.65f, 4f, 6f),
+    Ember(2, 0.91f, 0.46f, 4, 0.10f, -8f, 8f),
 )
 
 /** Camada decorativa sem interceptar toques ou criar elementos de acessibilidade. */
@@ -61,9 +61,11 @@ fun AmbientEmbers(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     if ((context.getSystemService(Context.POWER_SERVICE) as PowerManager).isPowerSaveMode) return
     val sprites: List<ImageBitmap> = listOf(
-        // Tiras com os 24 quadros lado a lado
-        ImageBitmap.imageResource(R.drawable.ember_long_frames),
-        ImageBitmap.imageResource(R.drawable.ember_double_frames),
+        // Tiras com os 64 quadros da chama lado a lado: gota, fina, curvada, bifurcada, fragmento
+        ImageBitmap.imageResource(R.drawable.ember_drop_frames),
+        ImageBitmap.imageResource(R.drawable.ember_thin_frames),
+        ImageBitmap.imageResource(R.drawable.ember_curved_frames),
+        ImageBitmap.imageResource(R.drawable.ember_forked_frames),
         ImageBitmap.imageResource(R.drawable.ember_shard_frames),
     )
     // Relógio próprio, a cada quadro da tela. Não usa as animações do Compose porque elas
@@ -81,7 +83,7 @@ fun AmbientEmbers(modifier: Modifier = Modifier) {
             val p = (phase * e.laps + e.offset) % 1f
             val img = sprites[e.sprite]
             val frameW = img.width / FRAMES
-            // Cintilação: troca de quadro a cada 80 ms; cada brasa começa num quadro diferente
+            // Chama: troca de quadro a cada 20 ms; cada brasa começa num quadro diferente
             val frame = ((clockMs / FRAME_MS).toInt() + (e.offset * FRAMES).toInt()) % FRAMES
             val px = e.pixelDp.dp.toPx()
             val w = frameW * px
