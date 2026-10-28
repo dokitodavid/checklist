@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.imageResource
 import com.dkt.todo.R
 
@@ -30,12 +31,21 @@ fun SceneryImage(
 }
 
 /**
- * Fundo das abas secundárias: cenário vertical de ruínas preso à tela (o conteúdo rola na
- * frente), discreto para não atrapalhar a leitura.
+ * Fundo das abas secundárias, como papel de parede: cenário vertical de ruínas preso à tela
+ * (o conteúdo rola na frente), discreto para não atrapalhar a leitura. Mantém sempre a maior
+ * altura já medida, para não se mexer nem mudar de tamanho quando o teclado sobe.
  */
 @Composable
 fun RuinsBackground(modifier: Modifier = Modifier) {
-    Box(modifier.fillMaxSize()) {
+    val tallest = remember { IntArray(1) }
+    Box(
+        modifier.fillMaxSize().layout { measurable, constraints ->
+            if (constraints.hasBoundedHeight) tallest[0] = maxOf(tallest[0], constraints.maxHeight)
+            val height = maxOf(tallest[0], constraints.minHeight)
+            val placeable = measurable.measure(constraints.copy(minHeight = height, maxHeight = height))
+            layout(constraints.maxWidth, constraints.maxHeight) { placeable.place(0, 0) }
+        }
+    ) {
         SceneryImage(R.drawable.ruins_tabs, Modifier.fillMaxSize(), ContentScale.Crop, alpha = 0.30f)
     }
 }

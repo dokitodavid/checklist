@@ -12,7 +12,7 @@ Hermes; personagem original gerado para este app, sem reutilizar suas marcas.
 - Tarefas em linhas sem cartões; arrastar para os lados conclui/exclui, segurar e arrastar
   reordena, e editar/favoritar/excluir também ficam no menu ⋮.
 - Tarefas importantes ganham uma pequena estrela neutra; a ordem é manual.
-- Concluídas têm check cinza, texto riscado e separador de seção no filtro Todas.
+- Concluídas têm check cinza e texto riscado, e ficam no fim da lista, sem título de seção.
 - Sem cabeçalho medieval, texto de jornada, painel de progresso ou verde na interface.
 
 ## Arte e movimento
@@ -31,8 +31,9 @@ monocromática própria. O mago respira com um movimento discreto de 1 dp.
   4%. O cenário termina antes dos atalhos Todas/Pendentes/Feitas.
   A capa do mago é assimétrica, então só o mago é deslocado 15% da própria largura para a
   esquerda, deixando capuz e tronco no eixo da tela e do portal da catedral.
-- `ruins_tabs.webp` — listas: cenário vertical preso à tela (Crop central), com 30% de
-  opacidade; a lista rola na frente. Componente `RuinsBackground` em `Scenery.kt`.
+- `ruins_tabs.webp` — listas: papel de parede na tela inteira, atrás do cabeçalho e da lista
+  (Crop central), com 30% de opacidade. Não se move nem muda de tamanho ao abrir a tela ou
+  quando o teclado sobe; a lista rola na frente. Componente `RuinsBackground` em `Scenery.kt`.
 - `ruins_widget_bg.webp` — widget: cenário horizontal da versão anterior, menor e já esmaecido
   (25% sobre o cinza `#212121`), para não aplicar transparência ao widget inteiro. O widget
   não tem personagem nem brasas; mostra o quadro de atividade e o botão de adicionar.

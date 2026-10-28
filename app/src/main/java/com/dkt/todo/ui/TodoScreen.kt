@@ -66,6 +66,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -238,7 +239,12 @@ fun TodoScreen(
         else -> "$pending pendentes"
     }
 
+    // Papel de parede preso à tela inteira, atrás de tudo: não se move nem muda de tamanho
+    // quando a tela abre ou o teclado sobe (o conteúdo é que se ajusta por cima dele)
+    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    RuinsBackground()
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             ScreenHeader(
                 title = "Checklist",
@@ -304,8 +310,6 @@ fun TodoScreen(
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         Box(Modifier.padding(padding).fillMaxSize()) {
-        // Cenário de ruínas ao fundo, preso à tela; a lista rola na frente
-        RuinsBackground()
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp),
@@ -370,9 +374,6 @@ fun TodoScreen(
                                 onDragStopped = { update(tasks) },
                             )
                             Column {
-                                if (filter == Filter.ALL && task.done && task.id == visible.firstOrNull { it.done }?.id) {
-                                    Text("Concluídas", modifier = Modifier.padding(start = 12.dp, top = 20.dp, bottom = 8.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
                                 SwipeableTask(
                                     task = task,
                                     onToggle = { origin -> toggle(task, gestureOrigin = origin) },
@@ -401,6 +402,7 @@ fun TodoScreen(
             }
         }
         }
+    }
     }
 
     editing?.let { task ->

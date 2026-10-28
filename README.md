@@ -16,7 +16,7 @@ Kotlin · Jetpack Compose · Material 3
 | | |
 |---|---|
 | **Adicionar** | Digite no campo de baixo e toque em enviar (ou Enter). A tarefa nova entra no topo. |
-| **Concluir** | Toque no checkbox ou **arraste a tarefa para a direita**. Ela fica riscada e vai para *Concluídas*. Arrastar para a direita uma feita reabre. |
+| **Concluir** | Toque no checkbox ou **arraste a tarefa para a direita**. Ela fica riscada e vai para o fim da lista. Arrastar para a direita uma feita reabre. |
 | **Excluir** | **Arraste para a esquerda** (ou menu ⋮ → Excluir), com **Desfazer** na barra de baixo por alguns segundos. |
 | **Reordenar** | **Segure e arraste** uma pendente para mudar a ordem. A ordem é sua: nada muda de lugar sozinho. |
 | **Data e lembrete** | No diálogo de edição: escolha o dia e, se quiser, o horário do lembrete (notificação com botão **Concluir**). A data aparece embaixo do título, em vermelho se estiver atrasada. |
