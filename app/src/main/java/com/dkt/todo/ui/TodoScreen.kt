@@ -245,6 +245,8 @@ fun TodoScreen(
     RuinsBackground()
     Scaffold(
         containerColor = Color.Transparent,
+        // Com o fundo transparente, a cor do conteúdo precisa ser dada (senão título e ícones ficam pretos)
+        contentColor = MaterialTheme.colorScheme.onBackground,
         topBar = {
             ScreenHeader(
                 title = "Checklist",

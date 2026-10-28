@@ -92,18 +92,8 @@ fun ActivityScreen(store: TaskStore, onOpenList: (Filter) -> Unit, onAddTask: ()
     val pending = tasks.count { !it.done }
     val done = tasks.count { it.done }
 
+    // Sem cabeçalho: a tela começa direto no mago (a contagem fica nos atalhos)
     Scaffold(
-        topBar = {
-            ScreenHeader(
-                title = "Checklist",
-                subtitle = when (pending) {
-                    0 -> if (tasks.isEmpty()) "Nenhuma tarefa" else "Tudo em dia"
-                    1 -> "1 pendente"
-                    else -> "$pending pendentes"
-                },
-                showCompanion = false,
-            )
-        },
     ) { padding ->
         Column(
             Modifier
