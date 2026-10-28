@@ -8,6 +8,11 @@ on:
 permissions:
   contents: write
 
+# Um build por vez: o próximo só conta as tags depois que o anterior publicou a release
+concurrency:
+  group: build-apk
+  cancel-in-progress: false
+
 env:
   # Mude para 2 quando quiser começar a 2.0 (a próxima release sai como 2.0, depois 2.1…)
   VERSAO_PRINCIPAL: 1
