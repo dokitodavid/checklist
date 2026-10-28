@@ -21,21 +21,32 @@ em pixel art de alta resolução. `checklist-icon.png` e `favicon.png` contêm o
 do capuz. O launcher usa retrato adaptativo e variante monocromática própria.
 A figura aparece no estado vazio, com movimento discreto de 1dp para sugerir respiração.
 
-`AmbientEmbers.kt` desenha sete brasas pixeladas esparsas em um ciclo de 24 segundos.
-São quadrados de 2–3dp em âmbar (`#F2A541`), com opacidade máxima de 50%.
-A camada não contém controles nem interceptadores de toque; as brasas não são
-anunciadas por leitores de tela. O relógio Compose respeita a escala de animação
-do sistema e o ciclo de vida. O modo de economia é verificado ao compor a camada.
+`AmbientEmbers.kt` anima sete brasas em pixel art (`ember_long`, `ember_double` e
+`ember_shard`, de `design/brasas/`). Cada uma sobe a tela em 14–24 segundos, balança,
+gira devagar e acende/apaga, com opacidade máxima de 60%. Os pixels são desenhados sem
+suavização (`FilterQuality.None`). A camada não contém controles nem interceptadores de
+toque; as brasas não são anunciadas por leitores de tela. O relógio Compose respeita a
+escala de animação do sistema e o ciclo de vida. O modo de economia é verificado ao
+compor a camada.
 
 No widget, `AndroidRemoteViews` incorpora um `ProgressBar` indeterminado cujo desenho é
-`embers_animated.xml`, um vetor animado com sete brasas que sobem, balançam e acendem/apagam
-de forma contínua. O launcher roda essa animação sozinho: sem serviço, atualização
+`embers_animated.xml`, um vetor animado com as mesmas brasas (cada pixel da arte vira um
+quadrado do vetor) que sobem, balançam, giram e acendem/apagam de forma contínua. O launcher roda essa animação sozinho: sem serviço, atualização
 periódica ou rede. Com animações desativadas ou economia de energia ativa, o widget usa
 a composição estática `embers_still.xml`. O mago fica sempre no cabeçalho do widget.
 Os controles de adicionar e concluir continuam em Glance.
 
 Todas as imagens são locais. Para uma interface web, copie `favicon.png` para
 seus arquivos públicos e use `<link rel="icon" href="/favicon.png" type="image/png">`.
+
+## Brasas
+
+As artes originais ficam em `design/brasas/`. Para regenerar os PNGs reduzidos e os
+vetores do widget depois de trocar uma arte ou ajustar as partículas do widget:
+
+```bash
+python3 design/brasas/gerar_brasas.py
+```
 
 ## Compilação e validação
 
