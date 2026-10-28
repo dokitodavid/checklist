@@ -3,7 +3,6 @@ package com.dkt.todo
 import android.content.Context
 import android.widget.RemoteViews
 import android.os.PowerManager
-import android.provider.Settings
 import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.LocalContext
 import androidx.compose.runtime.Composable
@@ -104,7 +103,6 @@ private fun WidgetContent(tasks: List<Task>) {
     val openApp = actionStartActivity<MainActivity>()
 
     val context = LocalContext.current
-    val animations = Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f
     val batterySaver = (context.getSystemService(Context.POWER_SERVICE) as PowerManager).isPowerSaveMode
     Box(GlanceModifier.fillMaxSize().appWidgetBackground().background(ColorProvider(AshenColors.Night)).cornerRadius(20.dp)) {
     Column(
@@ -210,7 +208,7 @@ private fun WidgetContent(tasks: List<Task>) {
         }
     }
     AndroidRemoteViews(
-        remoteViews = RemoteViews(context.packageName, if (animations && !batterySaver) R.layout.widget_embers else R.layout.widget_embers_still),
+        remoteViews = RemoteViews(context.packageName, if (batterySaver) R.layout.widget_embers_still else R.layout.widget_embers),
         modifier = GlanceModifier.fillMaxSize(),
     )
     }

@@ -4,8 +4,11 @@ Cada spritesheet tem 24 quadros de cintilação (ver animacao.json), ampliados 4
 Este script:
 1. reduz os quadros para o tamanho real da arte e recorta todos na mesma caixa;
 2. salva uma tira horizontal por brasa (ember_*_frames.png), usada pelo app;
-3. gera o vetor animado do widget a partir do primeiro quadro (cada pixel vira um quadrado);
-4. gera a versão parada do widget.
+3. salva cada quadro separado (ember_*_NN.png), usado pelo widget;
+4. gera a animação quadro a quadro do widget (embers_animated.xml) e a versão parada.
+
+O widget usa animação quadro a quadro (animation-list) dentro de um ProgressBar porque ela
+não depende da escala de duração do Animator do sistema, ao contrário de vetores animados.
 
 Uso, na raiz do repositório:  python3 design/brasas/gerar_brasas.py
 Requer Pillow e NumPy.
@@ -45,149 +48,92 @@ def load_frames(path):
     return [f.crop(box) for f in frames]
 
 
-def color_paths(img, colors=12):
-    """Agrupa os pixels por cor (paleta reduzida) e devolve {cor: pathData}."""
-    rgb = img.convert("RGB").quantize(colors=colors, method=Image.Quantize.MEDIANCUT)
-    pal = rgb.getpalette()
-    idx = np.asarray(rgb)
-    alpha = np.asarray(img)[..., 3]
-    paths = {}
-    for y in range(img.height):
-        x = 0
-        while x < img.width:
-            if alpha[y, x] == 0:
-                x += 1
-                continue
-            c = idx[y, x]
-            x1 = x
-            while x1 + 1 < img.width and alpha[y, x1 + 1] and idx[y, x1 + 1] == c:
-                x1 += 1
-            hexc = "#%02X%02X%02X" % tuple(pal[c * 3:c * 3 + 3])
-            paths.setdefault(hexc, []).append(f"M{x},{y}h{x1 - x + 1}v1h-{x1 - x + 1}z")
-            x = x1 + 1
-    return {c: "".join(p) for c, p in paths.items()}
-
-
-# Partículas do widget: (sprite, x central, escala, inclinação, duração ms, atraso ms)
-# Viewport 320×180 ≈ dp do widget.
+# Partículas do widget: (sprite, x central em dp, dp por pixel da arte, inclinação, giro,
+# defasagem na subida, defasagem na cintilação). Área de desenho: W×H dp a partir do canto.
 WIDGET = [
-    (0, 30, 0.42, -6, 13000, 0),
-    (2, 78, 0.40, 10, 11000, 5200),
-    (1, 126, 0.45, 0, 12000, 2300),
-    (0, 172, 0.36, 8, 14500, 8400),
-    (2, 218, 0.34, -14, 10500, 3700),
-    (1, 262, 0.40, 6, 12500, 9900),
-    (0, 302, 0.38, -10, 11500, 6100),
+    (0, 22, 0.40, -6, 10, 0.00, 0),
+    (2, 66, 0.26, 12, 14, 0.55, 7),
+    (1, 108, 0.24, 0, 16, 0.22, 13),
+    (0, 150, 0.36, 8, 8, 0.78, 4),
+    (2, 194, 0.22, -14, 12, 0.36, 19),
+    (1, 238, 0.22, 6, 14, 0.66, 10),
 ]
-VW, VH = 320, 180
+W, H = 260, 170
+FRAME_MS = ANIM["duration_ms"]          # 80 ms, o tempo de cada quadro de cintilação
+LOOP_FRAMES = 5 * ANIM["frames"]        # 120 quadros = 9,6 s, fecha o ciclo da cintilação
 MAX_ALPHA = 0.6
 
 
-def particle_group(i, sprite, cx, cy, k, tilt, paths, w, h, alpha):
-    x0, y0 = cx - w * k / 2, cy - h * k / 2
-    inner = "\n".join(
-        f'                        <path android:name="e{i}p{j}" android:fillColor="{c}"'
-        f' android:fillAlpha="{alpha}" android:pathData="{d}" />'
-        for j, (c, d) in enumerate(paths.items())
-    )
-    return f'''        <group android:name="rise{i}">
-            <group android:name="sway{i}">
-                <group android:name="spin{i}" android:pivotX="{cx:.1f}" android:pivotY="{cy:.1f}" android:rotation="{tilt}">
-                    <group android:translateX="{x0:.2f}" android:translateY="{y0:.2f}" android:scaleX="{k}" android:scaleY="{k}">
-{inner}
-                    </group>
-                </group>
-            </group>
-        </group>'''
+def alpha_at(p):
+    """Acende rápido, fica estável e vai se apagando na segunda metade (igual ao app)."""
+    if p < 0.1:
+        return MAX_ALPHA * p / 0.1
+    if p < 0.4:
+        return MAX_ALPHA
+    return MAX_ALPHA * (1 - (p - 0.4) / 0.6) ** 2
+
+
+def layer_items(t, sizes, still=False):
+    """Itens do layer-list para o instante t (0–1 do ciclo)."""
+    items = []
+    for i, (s, x, k, tilt, swing, off, flick) in enumerate(WIDGET):
+        p = (t + off) % 1
+        w, h = sizes[s]
+        dw, dh = w * k, h * k
+        a = MAX_ALPHA * 0.8 if still else alpha_at(p)
+        if a < 0.02:
+            continue
+        cx = x + math.sin(p * 4 * math.pi) * (4 + i % 3)
+        cy = (H * (0.25 + 0.5 * ((i * 0.37) % 1))) if still else (H + dh - p * (H + 2 * dh))
+        rot = tilt + math.sin(p * 2 * math.pi) * swing
+        frame = (round(t * LOOP_FRAMES) + flick) % ANIM["frames"]
+        name = f"{SPRITES[s][1]}_{frame:02d}"
+        items.append(
+            f'<item android:left="{cx - dw / 2:.1f}dp" android:top="{cy - dh / 2:.1f}dp"'
+            f' android:width="{dw:.1f}dp" android:height="{dh:.1f}dp">'
+            f'<rotate android:fromDegrees="{rot:.1f}" android:toDegrees="{rot:.1f}"'
+            f' android:pivotX="50%" android:pivotY="50%">'
+            f'<bitmap android:src="@drawable/{name}" android:alpha="{a:.2f}" android:filter="false" />'
+            f'</rotate></item>'
+        )
+    return "".join(items)
 
 
 def main():
-    sprites = []
+    nodpi = RES / "drawable-nodpi"
+    for old in nodpi.glob("ember_*.png"):
+        old.unlink()
+    sizes = []
     for src, name in SPRITES:
         frames = load_frames(SRC / src)
         w, h = frames[0].size
+        sizes.append((w, h))
         strip = Image.new("RGBA", (w * len(frames), h))
         for i, f in enumerate(frames):
             strip.paste(f, (i * w, 0))
-        strip.save(RES / "drawable-nodpi" / f"{name}_frames.png", optimize=True)
-        sprites.append((frames[0], color_paths(frames[0])))
-        print(f"{name}_frames.png  {len(frames)} quadros de {w}x{h}")
-
-    groups, targets = [], []
-    rep = 'android:repeatCount="infinite" android:repeatMode="restart"'
-    for i, (s, cx, k, tilt, dur, delay) in enumerate(WIDGET):
-        img, paths = sprites[s]
-        h = img.height * k
-        groups.append(particle_group(i, s, cx, VH + h, k, tilt, paths, img.width, img.height, 0))
-        targets.append(f'''    <target android:name="rise{i}">
-        <aapt:attr name="android:animation">
-            <objectAnimator android:propertyName="translateY" android:valueType="floatType"
-                android:valueFrom="0" android:valueTo="-{VH + 2 * h + 8:.1f}" android:duration="{dur}"
-                android:startOffset="{delay}" {rep} android:interpolator="@android:interpolator/linear" />
-        </aapt:attr>
-    </target>
-    <target android:name="sway{i}">
-        <aapt:attr name="android:animation">
-            <objectAnimator android:propertyName="translateX" android:valueType="floatType"
-                android:valueFrom="-{4 + i % 3}" android:valueTo="{4 + i % 3}" android:duration="{2600 + i * 350}"
-                android:repeatCount="infinite" android:repeatMode="reverse"
-                android:interpolator="@android:interpolator/accelerate_decelerate" />
-        </aapt:attr>
-    </target>
-    <target android:name="spin{i}">
-        <aapt:attr name="android:animation">
-            <objectAnimator android:propertyName="rotation" android:valueType="floatType"
-                android:valueFrom="{tilt - 12}" android:valueTo="{tilt + 12}" android:duration="{3400 + i * 420}"
-                android:repeatCount="infinite" android:repeatMode="reverse"
-                android:interpolator="@android:interpolator/accelerate_decelerate" />
-        </aapt:attr>
-    </target>''')
-        for j in range(len(paths)):
-            targets.append(f'''    <target android:name="e{i}p{j}">
-        <aapt:attr name="android:animation">
-            <objectAnimator android:duration="{dur}" android:startOffset="{delay}" {rep}
-                android:interpolator="@android:interpolator/linear">
-                <propertyValuesHolder android:propertyName="fillAlpha" android:valueType="floatType">
-                    <keyframe android:fraction="0" android:value="0" />
-                    <keyframe android:fraction="0.1" android:value="{MAX_ALPHA}" />
-                    <keyframe android:fraction="0.4" android:value="{MAX_ALPHA}" />
-                    <keyframe android:fraction="0.7" android:value="{MAX_ALPHA * 0.25:.2f}" />
-                    <keyframe android:fraction="1" android:value="0" />
-                </propertyValuesHolder>
-            </objectAnimator>
-        </aapt:attr>
-    </target>''')
+            f.save(nodpi / f"{name}_{i:02d}.png", optimize=True)
+        strip.save(nodpi / f"{name}_frames.png", optimize=True)
+        print(f"{name}: {len(frames)} quadros de {w}x{h}")
 
     header = "<!-- Gerado por design/brasas/gerar_brasas.py. Não edite à mão. -->"
-    (RES / "drawable" / "embers_animated.xml").write_text(f'''<?xml version="1.0" encoding="utf-8"?>
+    ns = 'xmlns:android="http://schemas.android.com/apk/res/android"'
+    frames_xml = "\n".join(
+        f'    <item android:duration="{FRAME_MS}"><layer-list>{layer_items(f / LOOP_FRAMES, sizes)}</layer-list></item>'
+        for f in range(LOOP_FRAMES)
+    )
+    (RES / "drawable" / "embers_animated.xml").write_text(f"""<?xml version="1.0" encoding="utf-8"?>
 {header}
-<!-- Brasas do widget. O launcher anima este vetor dentro de um ProgressBar (layout/widget_embers.xml). -->
-<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt">
-    <aapt:attr name="android:drawable">
-        <vector android:width="{VW}dp" android:height="{VH}dp"
-            android:viewportWidth="{VW}" android:viewportHeight="{VH}">
-{chr(10).join(groups)}
-        </vector>
-    </aapt:attr>
-{chr(10).join(targets)}
-</animated-vector>
-''')
-
-    # Versão parada: as mesmas brasas em posições fixas
-    still = []
-    for i, (s, cx, k, tilt, dur, delay) in enumerate(WIDGET[::2]):
-        img, paths = sprites[s]
-        cy = VH * (0.25 + 0.5 * ((i * 0.37) % 1))
-        still.append(particle_group(i, s, cx, cy, k, tilt, paths, img.width, img.height, MAX_ALPHA * 0.8))
-    (RES / "drawable" / "embers_still.xml").write_text(f'''<?xml version="1.0" encoding="utf-8"?>
+<!-- Brasas do widget, quadro a quadro ({LOOP_FRAMES} × {FRAME_MS} ms). Rodam dentro de um ProgressBar
+     (layout/widget_embers.xml), que inicia a animação sozinho no launcher. -->
+<animation-list {ns} android:oneshot="false">
+{frames_xml}
+</animation-list>
+""")
+    (RES / "drawable" / "embers_still.xml").write_text(f"""<?xml version="1.0" encoding="utf-8"?>
 {header}
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="{VW}dp" android:height="{VH}dp"
-    android:viewportWidth="{VW}" android:viewportHeight="{VH}">
-{chr(10).join(still)}
-</vector>
-''')
+<layer-list {ns}>{layer_items(0, sizes, still=True)}</layer-list>
+""")
+    print(f"embers_animated.xml: {LOOP_FRAMES} quadros")
 
 
 if __name__ == "__main__":

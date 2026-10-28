@@ -26,17 +26,18 @@ A figura aparece no estado vazio, com movimento discreto de 1dp para sugerir res
 em 14–24 segundos, balança e gira devagar. Acende rápido ao entrar (máximo de 60%) e vai
 perdendo opacidade aos poucos na segunda metade da subida, até sumir. Os pixels são desenhados sem
 suavização (`FilterQuality.None`). A camada não contém controles nem interceptadores de
-toque; as brasas não são anunciadas por leitores de tela. O relógio Compose respeita a
-escala de animação do sistema e o ciclo de vida. O modo de economia é verificado ao
-compor a camada.
+toque; as brasas não são anunciadas por leitores de tela. O movimento usa o relógio de
+quadros da tela, e não as animações do Compose, para continuar mesmo com a escala de
+duração do Animator zerada (alguns modos de bateria e desempenho fazem isso). Só param
+com a economia de energia, verificada ao compor a camada.
 
 No widget, `AndroidRemoteViews` incorpora um `ProgressBar` indeterminado cujo desenho é
-`embers_animated.xml`, um vetor animado com as mesmas brasas (primeiro quadro de cada arte;
-cada pixel vira um quadrado do vetor) que sobem, balançam, giram e acendem/apagam de forma
-contínua. A cintilação fica só no app: no vetor exigiria 24 cópias de cada brasa. O launcher roda essa animação sozinho: sem serviço, atualização
-periódica ou rede. Com animações desativadas ou economia de energia ativa, o widget usa
-a composição estática `embers_still.xml`. O mago fica sempre no cabeçalho do widget.
-Os controles de adicionar e concluir continuam em Glance.
+`embers_animated.xml`: uma animação quadro a quadro (120 quadros de 80 ms, ciclo de 9,6 s)
+em que cada quadro posiciona seis brasas, com rotação, opacidade e o quadro de cintilação
+de cada uma. O launcher roda essa animação sozinho, sem serviço, atualização periódica ou
+rede, e ela não depende da escala de animação do sistema. Com economia de energia ativa,
+o widget usa a composição estática `embers_still.xml`. O mago fica sempre no cabeçalho do
+widget. Os controles de adicionar e concluir continuam em Glance.
 
 Todas as imagens são locais. Para uma interface web, copie `favicon.png` para
 seus arquivos públicos e use `<link rel="icon" href="/favicon.png" type="image/png">`.
@@ -44,8 +45,8 @@ seus arquivos públicos e use `<link rel="icon" href="/favicon.png" type="image/
 ## Brasas
 
 As spritesheets originais (24 quadros, ampliados 4×), `animacao.json` e prévias em GIF
-ficam em `design/brasas/`. Para regenerar as tiras de quadros e os vetores do widget
-depois de trocar uma arte ou ajustar as partículas do widget:
+ficam em `design/brasas/`. Para regenerar os quadros e a animação do widget depois de
+trocar uma arte ou ajustar as partículas do widget:
 
 ```bash
 python3 design/brasas/gerar_brasas.py

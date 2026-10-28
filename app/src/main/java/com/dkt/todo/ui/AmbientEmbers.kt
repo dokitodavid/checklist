@@ -2,13 +2,14 @@ package com.dkt.todo.ui
 
 import android.content.Context
 import android.os.PowerManager
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.FilterQuality
@@ -64,19 +65,23 @@ fun AmbientEmbers(modifier: Modifier = Modifier) {
         ImageBitmap.imageResource(R.drawable.ember_double_frames),
         ImageBitmap.imageResource(R.drawable.ember_shard_frames),
     )
-    val transition = rememberInfiniteTransition(label = "Brasas ambientes")
-    // Ciclo de 72 s; cada brasa dá 3, 4 ou 5 voltas nele (24, 18 ou 14,4 s para atravessar a tela)
-    val phase = transition.animateFloat(
-        0f, 1f,
-        infiniteRepeatable(tween(CYCLE_MS, easing = LinearEasing)), label = "Passagem lenta",
-    )
+    // Relógio próprio, a cada quadro da tela. Não usa as animações do Compose porque elas
+    // param quando a escala de duração do Animator do sistema está zerada (alguns modos de
+    // bateria/desempenho fazem isso), e as brasas devem se mexer sempre.
+    var clockMs by remember { mutableLongStateOf(0L) }
+    LaunchedEffect(Unit) {
+        val start = withFrameMillis { it }
+        while (true) withFrameMillis { clockMs = it - start }
+    }
     Canvas(modifier) {
+        // Ciclo de 72 s; cada brasa dá 3, 4 ou 5 voltas nele (24, 18 ou 14,4 s para atravessar a tela)
+        val phase = (clockMs % CYCLE_MS) / CYCLE_MS.toFloat()
         embers.forEach { e ->
-            val p = (phase.value * e.laps + e.offset) % 1f
+            val p = (phase * e.laps + e.offset) % 1f
             val img = sprites[e.sprite]
             val frameW = img.width / FRAMES
             // Cintilação: troca de quadro a cada 80 ms; cada brasa começa num quadro diferente
-            val frame = ((phase.value * CYCLE_MS / FRAME_MS).toInt() + (e.offset * FRAMES).toInt()) % FRAMES
+            val frame = ((clockMs / FRAME_MS).toInt() + (e.offset * FRAMES).toInt()) % FRAMES
             val px = e.pixelDp.dp.toPx()
             val w = frameW * px
             val h = img.height * px
