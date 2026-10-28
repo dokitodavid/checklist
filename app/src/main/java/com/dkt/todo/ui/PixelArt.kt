@@ -2,77 +2,81 @@ package com.dkt.todo.ui
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.dkt.todo.R
 import com.dkt.todo.ui.theme.AshenColors
-import kotlin.math.floor
-import kotlin.math.min
+import kotlin.math.sin
 
-// Pixels inteiros, sem imagens remotas ou dependências de fontes.
-private val fire = listOf(
-    "................", "........e.......", ".......ee.......", ".......ef.......",
-    "......eff.......", "......eff.e.....", ".....effffe.....", ".....effffe.....",
-    "....effygffe....", "....effygffe....", "...effyyggffe...", "...effygggffe...",
-    "....effggffe....", ".....effffe.....", "...wwwwwwwwww...", "..wwddwwddwwww..",
-    "...dddddddddd...", "..sss....sss....", ".sssss..sssss...", "................",
-)
-private val palette = mapOf(
-    'e' to Color(0xFFAE5139), 'f' to Color(0xFFE58B45),
-    'y' to AshenColors.Ember, 'g' to AshenColors.Gold,
-    'w' to Color(0xFF8B7655), 'd' to Color(0xFF574B39), 's' to Color(0xFF62695B),
-)
-
-enum class PixelSymbol(val pixels: List<String>) {
-    Check(listOf(".......", ".....##", "....##.", "#..##..", "####...", ".##....", ".......")),
-    Star(listOf("...#...", "..###..", "#######", ".#####.", "..###..", ".##.##.", ".#...#.")),
-    Trash(listOf("..###..", "#######", ".#...#.", ".#.#.#.", ".#.#.#.", ".#...#.", ".#####.")),
-    Plus(listOf(".......", "...#...", "...#...", ".#####.", "...#...", "...#...", ".......")),
-}
+// Os controles são discretos; a arte detalhada é o foco da identidade.
+enum class PixelSymbol { Check, Star, Trash, Plus }
 
 @Composable
 fun PixelIcon(symbol: PixelSymbol, description: String?, modifier: Modifier = Modifier, tint: Color = MaterialTheme.colorScheme.primary) {
-    Canvas(modifier.size(21.dp).then(if (description != null) Modifier.semantics { contentDescription = description } else Modifier)) {
-        val unit = min(size.width, size.height) / 7f
-        symbol.pixels.forEachIndexed { y, row -> row.forEachIndexed { x, c ->
-            if (c == '#') drawRect(tint, Offset(x * unit, y * unit), Size(unit, unit))
-        } }
-    }
+    Icon(
+        imageVector = when (symbol) {
+            PixelSymbol.Check -> Icons.Filled.Check
+            PixelSymbol.Star -> Icons.Filled.Star
+            PixelSymbol.Trash -> Icons.Filled.Delete
+            PixelSymbol.Plus -> Icons.Filled.Add
+        },
+        contentDescription = description, modifier = modifier.size(21.dp), tint = tint,
+    )
 }
 
-/** Quatro poses de chama; o relógio Compose respeita a escala de animação do Android. */
 @Composable
-fun PixelCampfire(modifier: Modifier = Modifier, animated: Boolean = true) {
-    val phase = if (animated) {
-        val transition = rememberInfiniteTransition(label = "Fogueira")
-        transition.animateFloat(
-            initialValue = 0f, targetValue = 4f,
-            animationSpec = infiniteRepeatable(tween(960, easing = LinearEasing), RepeatMode.Restart),
-            label = "Chama pixelada",
+fun CompanionEmblem(modifier: Modifier = Modifier) {
+    Image(
+        painterResource(R.drawable.ic_launcher_portrait),
+        contentDescription = "Capuz do mago assassino",
+        modifier = modifier, contentScale = ContentScale.Fit,
+    )
+}
+
+/** A arte usa o relógio Compose: respeita a escala de animação e o ciclo de vida. */
+@Composable
+fun AshenCompanion(modifier: Modifier = Modifier, animated: Boolean = true) {
+    val transition = if (animated) rememberInfiniteTransition(label = "Mago assassino") else null
+    val breath = transition?.animateFloat(
+        initialValue = -1f, targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(2600), RepeatMode.Reverse),
+        label = "Respiração sutil",
+    )
+    Box(modifier) {
+        Image(
+            bitmap = ImageBitmap.imageResource(R.drawable.ashen_companion),
+            contentDescription = "Mago assassino de capuz com adaga e uma brasa mágica",
+            modifier = Modifier.fillMaxSize().graphicsLayer {
+                translationY = (breath?.value ?: 0f) * 1.dp.toPx()
+            },
+            contentScale = ContentScale.Fit,
+            filterQuality = FilterQuality.None,
         )
-    } else null
-    Canvas(modifier.semantics { contentDescription = "Fogueira em pixel art" }) {
-        val unit = floor(min(size.width / 16, size.height / 20)).coerceAtLeast(1f)
-        val origin = Offset((size.width - unit * 16) / 2, (size.height - unit * 20) / 2)
-        val frame = (phase?.value ?: 0f).toInt().coerceIn(0, 3)
-        fire.forEachIndexed { y, row -> row.forEachIndexed pixel@{ x, c ->
-            val color = palette[c] ?: return@pixel
-            val sway = if (y < 8) listOf(0, 1, 0, -1)[frame] else 0
-            drawRect(color, origin + Offset((x + sway) * unit, y * unit), Size(unit, unit))
-        } }
-        // Uma única brasa sobe em passos, sem brilho ou flashes na tela.
-        if (animated) drawRect(AshenColors.Ember.copy(alpha = 0.7f), origin + Offset((3 + frame) * unit, (5 - frame) * unit), Size(unit, unit))
     }
 }

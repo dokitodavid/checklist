@@ -5,6 +5,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.painterResource
+import com.dkt.todo.R
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.CutCornerShape
@@ -166,24 +173,17 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
 
     val pending = tasks.count { !it.done }
     val subtitle = when (pending) {
-        0 -> "Tudo em dia"
+        0 -> if (tasks.isEmpty()) "Nenhuma tarefa" else "Tudo em dia"
         1 -> "1 pendente"
         else -> "$pending pendentes"
     }
 
-    val completed = tasks.count { it.done }
-    val progress by animateFloatAsState(
-        if (tasks.isEmpty()) 0f else completed.toFloat() / tasks.size,
-        animationSpec = tween(400), label = "Progresso das tarefas",
-    )
-
+    Box(Modifier.fillMaxSize()) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        PixelCampfire(Modifier.size(48.dp, 60.dp))
-                        Spacer(Modifier.width(12.dp))
                         Column {
                             Text("Checklist", style = MaterialTheme.typography.titleLarge)
                             Text(
@@ -214,42 +214,29 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
             )
         },
         bottomBar = {
-            Surface(color = MaterialTheme.colorScheme.surface) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .imePadding()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+            Surface(color = MaterialTheme.colorScheme.background) {
+                Surface(
+                    modifier = Modifier.navigationBarsPadding().imePadding().padding(horizontal = 16.dp, vertical = 12.dp),
+                    shape = RoundedCornerShape(28.dp), color = MaterialTheme.colorScheme.surfaceContainerHighest,
                 ) {
-                    OutlinedTextField(
-                        value = input,
-                        onValueChange = { input = it },
-                        modifier = Modifier
-                            .weight(1f)
-                            .focusRequester(focusRequester),
-                        placeholder = { Text("Sua próxima missão…") },
-                        label = { Text("Nova tarefa") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            capitalization = KeyboardCapitalization.Sentences,
-                            imeAction = ImeAction.Done,
-                        ),
-                        keyboardActions = KeyboardActions(onDone = { add() }),
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    FilledIconButton(
-                        onClick = { add() },
-                        enabled = input.isNotBlank(),
-                        modifier = Modifier.size(48.dp),
-                        shape = CutCornerShape(4.dp),
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                        ),
-                    ) {
-                        PixelIcon(PixelSymbol.Plus, "Adicionar tarefa", tint = LocalContentColor.current)
+                    Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 6.dp, top = 6.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                        BasicTextField(
+                            value = input, onValueChange = { input = it },
+                            modifier = Modifier.weight(1f).padding(vertical = 10.dp).focusRequester(focusRequester),
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface), singleLine = true,
+                            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions(onDone = { add() }),
+                            decorationBox = { field ->
+                                Box {
+                                    if (input.isEmpty()) Text("Adicionar uma tarefa", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    field()
+                                }
+                            },
+                        )
+                        FilledIconButton(onClick = { add() }, enabled = input.isNotBlank(), modifier = Modifier.size(48.dp), shape = CircleShape) {
+                            Icon(painterResource(R.drawable.ic_send_up), "Adicionar tarefa")
+                        }
                     }
                 }
             }
@@ -261,29 +248,6 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
                 .padding(padding)
                 .fillMaxSize()
         ) {
-            Column(
-                Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                    .fillMaxWidth()
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CutCornerShape(6.dp))
-                    .background(MaterialTheme.colorScheme.surface, CutCornerShape(6.dp))
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                Text("UM PASSO A CADA VEZ", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
-                Text(
-                    if (tasks.isEmpty()) "Toda jornada começa com uma tarefa."
-                    else if (pending == 0) "A jornada de hoje está completa."
-                    else "A chama segue acesa. Continue.",
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                LinearProgressIndicator(
-                    progress = { progress }, modifier = Modifier.fillMaxWidth().height(4.dp),
-                    color = MaterialTheme.colorScheme.secondary,
-                    trackColor = MaterialTheme.colorScheme.outlineVariant,
-                    gapSize = 0.dp, drawStopIndicator = {},
-                )
-                Text("$completed de ${tasks.size} concluídas", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -291,6 +255,13 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
                 Filter.entries.forEach { f ->
                     FilterChip(
                         selected = filter == f,
+                        shape = CircleShape,
+                        border = null,
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            selectedLabelColor = MaterialTheme.colorScheme.onSurface,
+                            labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ),
                         onClick = { filter = f },
                         label = { Text(f.label) },
                     )
@@ -303,13 +274,13 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    PixelCampfire(Modifier.size(96.dp, 120.dp))
+                    AshenCompanion(Modifier.size(120.dp, 180.dp))
                     Spacer(Modifier.height(16.dp))
                     Text(
                         when (filter) {
-                            Filter.ALL -> "Prepare sua jornada"
-                            Filter.PENDING -> "Descanse junto à fogueira"
-                            Filter.DONE -> "Cada conquista conta"
+                            Filter.ALL -> "Sua lista começa aqui"
+                            Filter.PENDING -> "Tudo em dia"
+                            Filter.DONE -> "Nenhuma tarefa concluída"
                         },
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary,
@@ -318,8 +289,8 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
                     Spacer(Modifier.height(8.dp))
                     Text(
                         when (filter) {
-                            Filter.ALL -> "Adicione sua primeira tarefa abaixo."
-                            Filter.PENDING -> "Tudo em dia. Sua próxima missão pode esperar."
+                            Filter.ALL -> "Adicione uma tarefa para começar."
+                            Filter.PENDING -> "Você concluiu todas as tarefas."
                             Filter.DONE -> "Suas tarefas concluídas aparecerão aqui."
                         },
                         style = MaterialTheme.typography.bodyMedium,
@@ -331,10 +302,13 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
                 ) {
                     items(visible, key = { it.id }) { task ->
                         Column(Modifier.animateItem()) {
+                            if (filter == Filter.ALL && task.done && task.id == visible.firstOrNull { it.done }?.id) {
+                                Text("Concluídas", modifier = Modifier.padding(start = 12.dp, top = 20.dp, bottom = 8.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
                             TaskRow(
                                 task = task,
                                 onToggle = {
@@ -351,6 +325,9 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
                 }
             }
         }
+    }
+
+    AmbientEmbers(Modifier.matchParentSize())
     }
 
     editing?.let { task ->

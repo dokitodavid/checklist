@@ -1,70 +1,52 @@
-# Checklist · Fogueira
+# Checklist · Mago assassino
 
-Identidade original em pixel art, inspirada na atmosfera de exploração e descanso
-junto à fogueira de jogos soulslike. O nome do app e os comandos continuam em português.
+Interface minimalista inspirada nos controles do ChatGPT para celular. A fantasia
+sombria fica restrita à ilustração e ao ícone. Referências de arte: Alethe Agents e
+Hermes; personagem original gerado para este app, sem reutilizar suas marcas.
 
-## Padrão visual
+## Interface
 
-| Uso | Cor |
-| --- | --- |
-| Fundo carvão | `#101211` |
-| Painéis de pedra | `#1A1E1B` |
-| Superfície elevada | `#242A25` |
-| Contornos | `#454B40` |
-| Destaque em brasa | `#E7AD62` |
-| Luz da fogueira | `#F3D49A` |
-| Texto principal | `#E7E5D8` |
-| Texto secundário | `#A8B09F` |
-| Progresso e conclusão | `#A6BD8D` |
+- Fundo neutro `#212121`, campo e filtros `#303030`.
+- Texto `#ECECEC`, texto secundário `#A0A0A0`, contornos `#454545`.
+- Fonte sans-serif do sistema, controles arredondados, campo em cápsula e envio circular.
+- Tarefas em linhas sem cartões; ações de editar, favoritar e excluir ficam no menu ⋮.
+- Tarefas importantes conservam uma pequena estrela neutra e prioridade na ordenação.
+- Concluídas têm check cinza, texto riscado e separador de seção no filtro Todas.
+- Sem cabeçalho medieval, texto de jornada, painel de progresso ou verde na interface.
 
-Use contornos de 1dp, cantos cortados de 4–10dp e espaçamento em múltiplos de 4dp.
-Títulos e pequenos rótulos usam a fonte monoespaçada do sistema; tarefas e textos
-longos usam a fonte padrão para facilitar a leitura. Não há fontes ou imagens remotas.
-A paleta é fixa, inclusive no widget, para manter a identidade em qualquer wallpaper.
+## Arte e movimento
 
-## Ícones
+`companion.png` é o mago de capuz, adaga e brasa mágica, com transparência e detalhe
+em pixel art de alta resolução. `checklist-icon.png` e `favicon.png` contêm o retrato
+do capuz. O launcher usa retrato adaptativo e variante monocromática própria.
+A figura aparece no estado vazio, com movimento discreto de 1dp para sugerir respiração.
 
-- `checklist-icon.svg` e `checklist-icon.png`: símbolo em fundo carvão para apresentação.
-- `favicon.svg` e `favicon.ico`: versão compacta para uma futura interface web.
-- O app nativo usa `ic_launcher_foreground.xml` em um ícone adaptativo Android 8+.
-- Android 13+ usa `ic_launcher_monochrome.xml` quando ícones temáticos estão ativos.
-- Estrela, lixeira, confirmação e adição são desenhados em uma grade de 7×7 pixels.
-- A fogueira usa uma grade de 16×20 pixels e mantém uma margem segura no launcher.
+`AmbientEmbers.kt` desenha sete brasas pixeladas esparsas em um ciclo de 24 segundos.
+São quadrados de 1–2dp em âmbar discreto (`#D4A17B`), com opacidade máxima de 30%.
+A camada não contém controles nem interceptadores de toque; as brasas não são
+anunciadas por leitores de tela. O relógio Compose respeita a escala de animação
+do sistema e o ciclo de vida. O modo de economia é verificado ao compor a camada.
 
-Para uma versão web, copie os favicons para a raiz pública e use:
+No widget, `AndroidRemoteViews` incorpora um `ViewFlipper` com 16 quadros vetoriais
+transparentes de cinco brasas, trocados a cada 1,5 segundo. Não usa serviço,
+atualização periódica do widget ou rede para animar. Ao atualizar o widget com
+animações desativadas ou economia de energia ativa, escolhe uma composição estática.
+A animação depende do suporte e das políticas do launcher; sua execução em um
+launcher real ainda precisa ser validada. Os controles de adicionar e concluir
+continuam em Glance. O personagem aparece apenas quando não há pendências.
 
-```html
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="alternate icon" href="/favicon.ico">
-```
+Todas as imagens são locais. Para uma interface web, copie `favicon.png` para
+seus arquivos públicos e use `<link rel="icon" href="/favicon.png" type="image/png">`.
 
-## Movimento
-
-A chama alterna quatro poses em um ciclo de 960ms; uma única brasa sobe em passos.
-O desenho Canvas lê o relógio na fase de desenho, evitando recompor a interface a
-cada frame. As outras transições usam 180ms para o selo de conclusão, 240ms para a
-cor do cartão e 400ms para o progresso. A lista mantém a animação de inclusão,
-remoção e mudança de posição do Compose. As animações seguem a escala de duração
-do Android; não há flashes, som ou vibração. O ícone do launcher e o widget são estáticos.
-
-## Uso e verificação
-
-As mudanças visuais mantêm o armazenamento local e as ações de adicionar, editar,
-concluir, favoritar, excluir, desfazer e filtrar. Os controles de ação têm área de
-toque de 48dp e descrição para leitores de tela; filtros permitem rolagem horizontal.
-O estado vazio pode rolar em telas pequenas ou quando o teclado está aberto.
-
-Para compilar e analisar:
+## Compilação e validação
 
 ```bash
 ./gradlew assembleRelease lintRelease
 ```
 
-A validação em dispositivo deve cobrir o teclado, fonte ampliada, escala de animação
-zero, restauração de tarefa excluída, atualização entre widget e app e recorte do
-ícone nos launchers circular e quadrado. Não foi executado em emulador ou celular
-neste ambiente.
+Validação em celular/emulador pendente: legibilidade da arte, teclado, fontes
+ampliadas, TalkBack, desfazer, atualização entre app e widget, toque através da
+camada de brasas, modo economia, animação desativada e ViewFlipper no launcher.
+A prévia gerada por imagem é ilustrativa, não uma captura de execução.
 
-`assembleRelease` e `lintRelease` passaram. O lint conserva oito avisos sobre
-atualizações de dependências, atributos do widget, qualificador de recursos e uma
-sugestão de KTX no armazenamento. Não há erros de lint.
+Compilação release, lint (sem erros) e assinatura do APK verificados.

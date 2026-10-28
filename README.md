@@ -17,9 +17,9 @@ Kotlin · Jetpack Compose · Material 3
 |---|---|
 | **Adicionar** | Digite no campo de baixo e toque em enviar (ou Enter). |
 | **Concluir** | Toque no checkbox. A tarefa fica riscada e desce para o fim da lista. |
-| **Importante** | Toque na estrela ⭐ — tarefas importantes sobem para o topo. |
+| **Importante** | Menu ⋮ da tarefa → Marcar importante. Importantes sobem para o topo. |
 | **Editar** | Toque no texto da tarefa para abrir o diálogo de edição. |
-| **Excluir** | Ícone da lixeira, com **Desfazer** na barra de baixo por alguns segundos. |
+| **Excluir** | Menu ⋮ da tarefa → Excluir, com **Desfazer** na barra de baixo por alguns segundos. |
 | **Filtrar** | Chips no topo: *Todas* · *Pendentes* · *Feitas*. |
 | **Limpar concluídas** | Menu ⋮ → remove todas as feitas de uma vez (também dá pra desfazer). |
 | **Contador** | Abaixo do título: “3 pendentes”, “1 pendente” ou “Tudo em dia”. |
@@ -36,13 +36,14 @@ Kotlin · Jetpack Compose · Material 3
 
 ### Visual
 
-- Identidade **pixel art / soulslike**: carvão, pedra, brasa e dourado envelhecido.
-- Fogueira original animada em quatro poses, ícones pixelados e painéis com cantos cortados.
-- Progresso animado, transições ao concluir tarefas e reordenação suave da lista.
-- Tema escuro fixo e widget com a mesma paleta, independente do wallpaper.
-- Ícone adaptativo com fogueira e variante monocromática para Android 13+.
-- Arte vetorial local, sem downloads; animações Compose seguem a escala de animação do Android.
-- [Guia visual e validação](design/README.md); [favicon SVG](design/favicon.svg).
+- Interface **clean**, neutra, com controles arredondados e campo em cápsula.
+- Lista sem cartões; ações de tarefa reunidas no menu ⋮.
+- Mago assassino original em pixel art detalhada no estado vazio e no ícone.
+- Brasas pixeladas discretas atravessam a tela devagar; widget usa animação em quadros,
+  cuja reprodução depende do launcher.
+- Tema escuro fixo, sem verde, com widget na mesma paleta.
+- Artes locais em alta resolução; ícone adaptativo e monocromático para Android 13+.
+- [Guia visual e limites de validação](design/README.md); [favicon PNG](design/favicon.png).
 
 ### Dados
 
@@ -100,7 +101,8 @@ app/src/main/java/com/dkt/todo/
     ├── TodoScreen.kt      # Tela principal: lista, filtros, campo, menu
     ├── TaskRow.kt         # Linha da tarefa
     ├── EditTaskDialog.kt  # Diálogo de edição
-    ├── PixelArt.kt        # Fogueira animada e ícones pixelados
+    ├── PixelArt.kt        # Personagem e ícones de ação
+    ├── AmbientEmbers.kt   # Brasas decorativas na tela
     └── theme/Theme.kt     # Paleta, tipografia e formas
 
 app/src/main/res/

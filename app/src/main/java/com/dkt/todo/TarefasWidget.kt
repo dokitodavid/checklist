@@ -1,6 +1,11 @@
 package com.dkt.todo
 
 import android.content.Context
+import android.widget.RemoteViews
+import android.os.PowerManager
+import android.provider.Settings
+import androidx.glance.appwidget.AndroidRemoteViews
+import androidx.glance.LocalContext
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -95,23 +100,21 @@ private fun WidgetContent(tasks: List<Task>) {
 
     val openApp = actionStartActivity<MainActivity>()
 
+    val context = LocalContext.current
+    val animations = Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f
+    val batterySaver = (context.getSystemService(Context.POWER_SERVICE) as PowerManager).isPowerSaveMode
+    Box(GlanceModifier.fillMaxSize().appWidgetBackground().background(ColorProvider(AshenColors.Night)).cornerRadius(20.dp)) {
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
-            .appWidgetBackground()
             .background(ColorProvider(AshenColors.Night))
-            .cornerRadius(4.dp)
+            .cornerRadius(20.dp)
             .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
         Row(
             modifier = GlanceModifier.fillMaxWidth().padding(start = 4.dp, bottom = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Image(
-                provider = ImageProvider(R.drawable.ic_launcher_foreground),
-                contentDescription = "Fogueira em pixel art",
-                modifier = GlanceModifier.size(40.dp),
-            )
             Column(modifier = GlanceModifier.defaultWeight().clickable(openApp)) {
                 Text(
                     text = "Checklist",
@@ -134,7 +137,7 @@ private fun WidgetContent(tasks: List<Task>) {
             Box(
                 modifier = GlanceModifier
                     .size(36.dp)
-                    .cornerRadius(2.dp)
+                    .cornerRadius(18.dp)
                     .background(ColorProvider(AshenColors.Raised))
                     .clickable(
                         actionStartActivity<MainActivity>(actionParametersOf(FocusInputKey to true))
@@ -155,10 +158,13 @@ private fun WidgetContent(tasks: List<Task>) {
                 modifier = GlanceModifier.fillMaxSize().clickable(openApp),
                 contentAlignment = Alignment.Center,
             ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(ImageProvider(R.drawable.ashen_companion), "Mago assassino", modifier = GlanceModifier.size(60.dp))
                 Text(
                     text = "Nada pendente",
                     style = TextStyle(fontSize = 14.sp, color = ColorProvider(AshenColors.Muted)),
                 )
+                }
             }
         } else {
             LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
@@ -170,7 +176,7 @@ private fun WidgetContent(tasks: List<Task>) {
                         CheckBox(
                             checked = false,
                             colors = CheckboxDefaults.colors(
-                                checkedColor = ColorProvider(AshenColors.Moss),
+                                checkedColor = ColorProvider(AshenColors.Parchment),
                                 uncheckedColor = ColorProvider(AshenColors.Muted),
                             ),
                             onCheckedChange = actionRunCallback<CompleteTaskAction>(
@@ -195,4 +201,10 @@ private fun WidgetContent(tasks: List<Task>) {
             }
         }
     }
+    AndroidRemoteViews(
+        remoteViews = RemoteViews(context.packageName, if (animations && !batterySaver) R.layout.widget_embers else R.layout.widget_embers_still),
+        modifier = GlanceModifier.fillMaxSize(),
+    )
+    }
+
 }
