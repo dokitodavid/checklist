@@ -149,8 +149,9 @@ def main():
                 android:interpolator="@android:interpolator/linear">
                 <propertyValuesHolder android:propertyName="fillAlpha" android:valueType="floatType">
                     <keyframe android:fraction="0" android:value="0" />
-                    <keyframe android:fraction="0.2" android:value="{MAX_ALPHA}" />
-                    <keyframe android:fraction="0.7" android:value="{MAX_ALPHA}" />
+                    <keyframe android:fraction="0.1" android:value="{MAX_ALPHA}" />
+                    <keyframe android:fraction="0.4" android:value="{MAX_ALPHA}" />
+                    <keyframe android:fraction="0.7" android:value="{MAX_ALPHA * 0.25:.2f}" />
                     <keyframe android:fraction="1" android:value="0" />
                 </propertyValuesHolder>
             </objectAnimator>

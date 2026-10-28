@@ -82,8 +82,12 @@ fun AmbientEmbers(modifier: Modifier = Modifier) {
             val h = img.height * px
             val cx = size.width * e.x + sin(p * 4 * PI).toFloat() * 8.dp.toPx()
             val cy = size.height + h - p * (size.height + 2 * h)
-            // Acende ao entrar, fica estável no meio e apaga ao sair (máximo de 60%)
-            val alpha = (sin(p * PI).toFloat() * 1.4f).coerceIn(0f, 1f) * 0.6f
+            // Acende rápido ao entrar e vai se apagando aos poucos na segunda metade da subida
+            val alpha = 0.6f * when {
+                p < 0.1f -> p / 0.1f
+                p < 0.4f -> 1f
+                else -> (1f - (p - 0.4f) / 0.6f).let { it * it }
+            }
             rotate(e.tilt + sin(p * 3 * PI).toFloat() * e.swing, pivot = Offset(cx, cy)) {
                 drawImage(
                     image = img,
