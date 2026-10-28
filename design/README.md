@@ -23,7 +23,7 @@ A figura aparece no estado vazio, com movimento discreto de 1dp para sugerir res
 
 `AmbientEmbers.kt` anima sete brasas em pixel art (`ember_*_frames.png`, de
 `design/brasas/`). Cada uma cintila em 24 quadros de 80 ms e, por cima disso, sobe a tela
-em 14–24 segundos, balança e gira devagar. Acende rápido ao entrar (máximo de 60%) e vai
+em 14–24 segundos, balança e gira devagar. Acende rápido ao entrar (máximo de 75%) e vai
 perdendo opacidade aos poucos na segunda metade da subida, até sumir. Os pixels são desenhados sem
 suavização (`FilterQuality.None`). A camada não contém controles nem interceptadores de
 toque; as brasas não são anunciadas por leitores de tela. O movimento usa o relógio de

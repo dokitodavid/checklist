@@ -51,17 +51,18 @@ def load_frames(path):
 # Partículas do widget: (sprite, x central em dp, dp por pixel da arte, inclinação, giro,
 # defasagem na subida, defasagem na cintilação). Área de desenho: W×H dp a partir do canto.
 WIDGET = [
-    (0, 22, 0.40, -6, 10, 0.00, 0),
-    (2, 66, 0.26, 12, 14, 0.55, 7),
-    (1, 108, 0.24, 0, 16, 0.22, 13),
-    (0, 150, 0.36, 8, 8, 0.78, 4),
-    (2, 194, 0.22, -14, 12, 0.36, 19),
-    (1, 238, 0.22, 6, 14, 0.66, 10),
+    # Cada pixel da arte com 0,5–0,55 dp: abaixo disso a cintilação some
+    (0, 22, 0.55, -6, 10, 0.00, 0),
+    (2, 66, 0.50, 12, 14, 0.55, 7),
+    (1, 108, 0.50, 0, 16, 0.22, 13),
+    (0, 150, 0.52, 8, 8, 0.78, 4),
+    (2, 194, 0.48, -14, 12, 0.36, 19),
+    (1, 238, 0.48, 6, 14, 0.66, 10),
 ]
 W, H = 260, 170
 FRAME_MS = ANIM["duration_ms"]          # 80 ms, o tempo de cada quadro de cintilação
 LOOP_FRAMES = 5 * ANIM["frames"]        # 120 quadros = 9,6 s, fecha o ciclo da cintilação
-MAX_ALPHA = 0.6
+MAX_ALPHA = 0.75
 
 
 def alpha_at(p):

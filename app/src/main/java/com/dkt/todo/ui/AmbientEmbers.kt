@@ -45,13 +45,14 @@ private class Ember(
 )
 
 private val embers = listOf(
-    Ember(0, 0.08f, 0.45f, 3, 0.00f, -6f, 10f),
-    Ember(2, 0.22f, 0.28f, 4, 0.55f, 12f, 14f),
-    Ember(1, 0.36f, 0.26f, 5, 0.20f, 0f, 18f),
-    Ember(0, 0.50f, 0.38f, 4, 0.80f, 8f, 8f),
-    Ember(2, 0.63f, 0.24f, 3, 0.35f, -14f, 12f),
-    Ember(1, 0.77f, 0.22f, 5, 0.65f, 6f, 16f),
-    Ember(0, 0.91f, 0.40f, 4, 0.10f, -10f, 10f),
+    // Cada pixel da arte com 0,55–0,7 dp (≈2 px de tela): abaixo disso a cintilação some
+    Ember(0, 0.08f, 0.70f, 3, 0.00f, -6f, 10f),
+    Ember(2, 0.22f, 0.56f, 4, 0.55f, 12f, 14f),
+    Ember(1, 0.36f, 0.55f, 5, 0.20f, 0f, 18f),
+    Ember(0, 0.50f, 0.62f, 4, 0.80f, 8f, 8f),
+    Ember(2, 0.63f, 0.52f, 3, 0.35f, -14f, 12f),
+    Ember(1, 0.77f, 0.52f, 5, 0.65f, 6f, 16f),
+    Ember(0, 0.91f, 0.66f, 4, 0.10f, -10f, 10f),
 )
 
 /** Camada decorativa sem interceptar toques ou criar elementos de acessibilidade. */
@@ -88,7 +89,7 @@ fun AmbientEmbers(modifier: Modifier = Modifier) {
             val cx = size.width * e.x + sin(p * 4 * PI).toFloat() * 8.dp.toPx()
             val cy = size.height + h - p * (size.height + 2 * h)
             // Acende rápido ao entrar e vai se apagando aos poucos na segunda metade da subida
-            val alpha = 0.6f * when {
+            val alpha = 0.75f * when {
                 p < 0.1f -> p / 0.1f
                 p < 0.4f -> 1f
                 else -> (1f - (p - 0.4f) / 0.6f).let { it * it }
