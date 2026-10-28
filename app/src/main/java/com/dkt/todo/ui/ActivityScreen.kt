@@ -333,8 +333,8 @@ private fun plural(n: Int, one: String, many: String) = "$n ${if (n == 1) one el
 private val HeroMageWidth = 196.dp
 
 /**
- * Cenário estendido atrás do mago. O cenário ocupa a largura toda (FillWidth, sem esticar)
- * e as bordas somem em degradê na cor de fundo; o mago fica na frente. A capa do mago é
+ * Cenário preenchendo a área inteira do mago, ancorado no topo para mostrar as torres
+ * acima do capuz. Só a base e as laterais recebem fade; o mago fica na frente. A capa é
  * assimétrica, então só ele é deslocado 15% da própria largura para a esquerda, para o capuz
  * e o tronco ficarem no eixo da tela e do portal da catedral.
  */
@@ -345,17 +345,18 @@ private fun HeroScene(modifier: Modifier = Modifier) {
         SceneryImage(
             R.drawable.ruins_hero,
             Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillWidth,
+            contentScale = ContentScale.Crop,
+            alignment = Alignment.TopCenter,
             alpha = 0.65f,
         )
         Box(
             Modifier.fillMaxSize().background(
-                Brush.verticalGradient(0f to bg, 0.2f to Color.Transparent, 0.72f to Color.Transparent, 1f to bg)
+                Brush.verticalGradient(0f to Color.Transparent, 0.82f to Color.Transparent, 1f to bg)
             )
         )
         Box(
             Modifier.fillMaxSize().background(
-                Brush.horizontalGradient(0f to bg, 0.12f to Color.Transparent, 0.88f to Color.Transparent, 1f to bg)
+                Brush.horizontalGradient(0f to bg, 0.04f to Color.Transparent, 0.96f to Color.Transparent, 1f to bg)
             )
         )
         AshenCompanion(

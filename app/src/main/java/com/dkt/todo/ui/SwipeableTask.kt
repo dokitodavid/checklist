@@ -15,6 +15,13 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,15 +35,19 @@ import com.dkt.todo.data.Task
 @Composable
 fun SwipeableTask(
     task: Task,
-    onToggle: () -> Unit,
+    onToggle: (Offset?) -> Unit,
     onDelete: () -> Unit,
     content: @Composable () -> Unit,
 ) {
+    var checkCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
     val state = rememberSwipeToDismissBoxState(positionalThreshold = { it * 0.35f })
     LaunchedEffect(state.currentValue) {
         when (state.currentValue) {
             SwipeToDismissBoxValue.StartToEnd -> {
-                onToggle()
+                val origin = checkCoordinates?.takeIf { it.isAttached }?.let { coordinates ->
+                    coordinates.localToWindow(Offset(coordinates.size.width / 2f, coordinates.size.height / 2f))
+                }
+                onToggle(origin)
                 state.snapTo(SwipeToDismissBoxValue.Settled)
             }
             SwipeToDismissBoxValue.EndToStart -> onDelete()
@@ -61,7 +72,10 @@ fun SwipeableTask(
                 Modifier.fillMaxSize().background(bg, MaterialTheme.shapes.medium).padding(horizontal = 20.dp),
                 contentAlignment = align,
             ) {
-                if (icon != null) Icon(icon, contentDescription = null, tint = colors.onSurface)
+                if (icon != null) Icon(icon, contentDescription = null, tint = colors.onSurface,
+                    modifier = Modifier.onGloballyPositioned { coordinates ->
+                        if (direction == SwipeToDismissBoxValue.StartToEnd) checkCoordinates = coordinates
+                    })
             }
         },
     ) {

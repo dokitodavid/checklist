@@ -31,9 +31,9 @@ fun ChecklistApp(store: TaskStore, focusTick: Int) {
     // Cada pedido de "nova tarefa" (widget ou Atividade) abre a lista com o teclado
     var focusRequests by rememberSaveable { mutableIntStateOf(0) }
     val states = rememberSaveableStateHolder()
-    // Quantas tarefas foram concluídas nesta abertura do app; cada aumento dispara a onda.
-    // Não é salvo: ao abrir, restaurar ou voltar de outra tela, a onda não toca.
-    var completions by remember { mutableIntStateOf(0) }
+    // Evento efêmero: mantém a posição do check antes de a linha se mover/sumir.
+    // Não é salvo e não dispara ao abrir/restaurar a tela.
+    var completion by remember { mutableStateOf<TaskCompletionEvent?>(null) }
 
     fun openList(f: Filter, focus: Boolean = false) {
         filter = f
@@ -61,12 +61,14 @@ fun ChecklistApp(store: TaskStore, focusTick: Int) {
                         onFilterChange = { filter = it },
                         focusTick = focusRequests,
                         onBack = { screen = Screen.ACTIVITY },
-                        onTaskCompleted = { completions++ },
+                        onTaskCompleted = { origin ->
+                            completion = TaskCompletionEvent((completion?.id ?: 0) + 1, origin)
+                        },
                     )
                 }
             }
         }
         // Onda de conclusão por cima de tudo, fora das barras do sistema e do teclado
-        TaskCompletionWave(completions, Modifier.matchParentSize().windowInsetsPadding(WindowInsets.safeDrawing))
+        TaskCompletionWave(completion, Modifier.matchParentSize().windowInsetsPadding(WindowInsets.safeDrawing))
     }
 }

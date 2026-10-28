@@ -12,6 +12,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -43,9 +45,13 @@ fun TaskRow(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
     dragging: Boolean = false,
+    onCheckPositioned: (LayoutCoordinates?) -> Unit = {},
 ) {
     val colors = MaterialTheme.colorScheme
     var menu by remember(task.id) { mutableStateOf(false) }
+    DisposableEffect(task.id) {
+        onDispose { onCheckPositioned(null) }
+    }
     Row(
         modifier.fillMaxWidth()
             .background(if (dragging) colors.surfaceContainerHighest else Color.Transparent, MaterialTheme.shapes.medium)
@@ -54,7 +60,9 @@ fun TaskRow(
     ) {
         Box(Modifier.size(48.dp).toggleable(task.done, role = Role.Checkbox, onValueChange = { onToggle() })
             .semantics { contentDescription = if (task.done) "Reabrir: ${task.title}" else "Concluir: ${task.title}" }, contentAlignment = Alignment.Center) {
-            Box(Modifier.size(23.dp).background(if (task.done) colors.onSurfaceVariant else colors.background, CircleShape)
+            Box(Modifier.size(23.dp).onGloballyPositioned { coordinates ->
+                onCheckPositioned(coordinates)
+            }.background(if (task.done) colors.onSurfaceVariant else colors.background, CircleShape)
                 .border(1.5.dp, colors.onSurfaceVariant, CircleShape), contentAlignment = Alignment.Center) {
                 if (task.done) PixelIcon(PixelSymbol.Check, null, Modifier.size(16.dp), colors.background)
             }

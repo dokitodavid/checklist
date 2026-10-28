@@ -24,19 +24,24 @@ monocromática própria. O mago respira com um movimento discreto de 1 dp.
 
 **Cenários** (`app/src/main/res/drawable-nodpi/`, em WebP, desenhados sem suavização):
 
-- `ruins_hero.webp` — tela principal (Atividade): cenário estendido de ruínas atrás do mago,
-  com 65% de opacidade, ocupando a largura da tela (FillWidth, sem esticar). As bordas somem
-  em degradê na cor de fundo, e o cenário termina antes dos atalhos Todas/Pendentes/Feitas.
+- `ruins_hero.webp` — tela principal (Atividade): novo cenário quadrado com torres estendidas
+  acima do capuz, com 65% de opacidade, preenchendo toda a área do mago com Crop e TopCenter.
+  O topo fica visível, sem degradê opaco; o fade é inferior (últimos 18%) e estreito nas
+  laterais (4%). O cenário termina antes dos atalhos Todas/Pendentes/Feitas.
   A capa do mago é assimétrica, então só o mago é deslocado 15% da própria largura para a
   esquerda, deixando capuz e tronco no eixo da tela e do portal da catedral.
 - `ruins_tabs.webp` — listas: cenário vertical preso à tela (Crop central), com 30% de
   opacidade; a lista rola na frente. Componente `RuinsBackground` em `Scenery.kt`.
-- `ruins_widget_bg.webp` — widget: o mesmo cenário da tela principal, menor e já esmaecido
+- `ruins_widget_bg.webp` — widget: cenário horizontal da versão anterior, menor e já esmaecido
   (25% sobre o cinza `#212121`), para não aplicar transparência ao widget inteiro. O widget
   não tem personagem nem brasas; mostra o quadro de atividade e o botão de adicionar.
 
 **Onda de conclusão** (`TaskCompletionWave.kt`): ao concluir uma tarefa pendente, uma onda
-monocromática de quadradinhos cinza se espalha pela tela em 960 ms. Só dispara na ação de
+monocromática de quadradinhos cinza nasce no centro do check acionado e se espalha
+pela tela em 960 ms. A origem é capturada em coordenadas da janela antes de a linha
+se mover/sumir e convertida para a Canvas considerando os insets; por gesto, usa
+o check de confirmação visível no fundo da mesma linha (o checkbox da frente já
+está saindo da tela nesse momento). Só dispara na ação de
 concluir (checkbox ou arrastar para a direita): não ao abrir o app, reabrir, desfazer ou
 navegar. Conclusões seguidas reiniciam a onda. Não recebe toques, não aparece para leitores
 de tela, fica fora das barras do sistema e do teclado e respeita a escala de animação do

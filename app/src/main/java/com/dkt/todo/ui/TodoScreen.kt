@@ -62,6 +62,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -97,7 +99,7 @@ fun TodoScreen(
     onFilterChange: (Filter) -> Unit,
     focusTick: Int = 0,
     onBack: () -> Unit = {},
-    onTaskCompleted: () -> Unit = {},
+    onTaskCompleted: (Offset) -> Unit = {},
 ) {
     var tasks by remember { mutableStateOf(store.load()) }
     var input by rememberSaveable { mutableStateOf("") }
@@ -108,6 +110,9 @@ fun TodoScreen(
     val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
+    // Ler a posição só no toque: LayoutCoordinates inclui rolagem e translação do gesto.
+    // Não é estado de UI: registrar o layout não deve recompor a lista.
+    val checkCoordinates = remember { mutableMapOf<Long, LayoutCoordinates>() }
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     // Mantém a tela em dia quando algo é marcado pelo widget
@@ -166,9 +171,12 @@ fun TodoScreen(
         undoable("Tarefa excluída", listOf(task))
     }
 
-    fun toggle(task: Task) {
-        // A onda só toca ao concluir de verdade (não ao reabrir)
-        if (!task.done) onTaskCompleted()
+    fun toggle(task: Task, gestureOrigin: Offset? = null) {
+        // Capturar antes de salvar/reordenar/remover a linha concluída do filtro.
+        val checkOrigin = gestureOrigin ?: checkCoordinates[task.id]?.takeIf { it.isAttached }?.let { coordinates ->
+            coordinates.localToWindow(Offset(coordinates.size.width / 2f, coordinates.size.height / 2f))
+        }
+        if (!task.done && checkOrigin != null) onTaskCompleted(checkOrigin)
         store.logDone(if (task.done) -1 else 1)
         update(tasks.map { if (it.id == task.id) it.copy(done = !it.done) else it })
     }
@@ -367,7 +375,7 @@ fun TodoScreen(
                                 }
                                 SwipeableTask(
                                     task = task,
-                                    onToggle = { toggle(task) },
+                                    onToggle = { origin -> toggle(task, gestureOrigin = origin) },
                                     onDelete = { delete(task) },
                                 ) {
                                     TaskRow(
@@ -379,6 +387,10 @@ fun TodoScreen(
                                         onEdit = { editing = task },
                                         onDelete = { delete(task) },
                                         dragging = dragging,
+                                        onCheckPositioned = { coordinates ->
+                                            if (coordinates != null) checkCoordinates[task.id] = coordinates
+                                            else checkCoordinates.remove(task.id)
+                                        },
                                         modifier = dragHandle,
                                     )
                                 }
