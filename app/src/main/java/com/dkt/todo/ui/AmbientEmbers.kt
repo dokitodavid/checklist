@@ -28,9 +28,9 @@ fun AmbientEmbers(modifier: Modifier = Modifier) {
             val p = (phase.value + i / 7f) % 1f
             val x = size.width * ((0.12f + i * 0.137f + sin(p * 6.28f) * 0.025f) % 1f)
             val y = size.height * (1.04f - p * 1.12f)
-            val alpha = sin(p * Math.PI).toFloat().coerceAtLeast(0f) * 0.30f
+            val alpha = sin(p * Math.PI).toFloat().coerceAtLeast(0f) * 0.50f
             drawRect(AshenColors.Ember.copy(alpha = alpha),
-                Offset(floor(x / pixel) * pixel, floor(y / pixel) * pixel), Size(pixel * (if (i % 3 == 0) 2 else 1), pixel * 2))
+                Offset(floor(x / pixel) * pixel, floor(y / pixel) * pixel), Size(pixel * (if (i % 3 == 0) 3 else 2), pixel * 3))
         }
     }
 }

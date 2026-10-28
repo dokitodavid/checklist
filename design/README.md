@@ -22,7 +22,7 @@ do capuz. O launcher usa retrato adaptativo e variante monocromática própria.
 A figura aparece no estado vazio, com movimento discreto de 1dp para sugerir respiração.
 
 `AmbientEmbers.kt` desenha sete brasas pixeladas esparsas em um ciclo de 24 segundos.
-São quadrados de 1–2dp em âmbar discreto (`#D4A17B`), com opacidade máxima de 30%.
+São quadrados de 2–3dp em âmbar (`#F2A541`), com opacidade máxima de 50%.
 A camada não contém controles nem interceptadores de toque; as brasas não são
 anunciadas por leitores de tela. O relógio Compose respeita a escala de animação
 do sistema e o ciclo de vida. O modo de economia é verificado ao compor a camada.
