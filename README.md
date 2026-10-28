@@ -23,6 +23,7 @@ Kotlin · Jetpack Compose · Material 3
 | **Filtrar** | Chips no topo: *Todas* · *Pendentes* · *Feitas*. |
 | **Limpar concluídas** | Menu ⋮ → remove todas as feitas de uma vez (também dá pra desfazer). |
 | **Contador** | Abaixo do título: “3 pendentes”, “1 pendente” ou “Tudo em dia”. |
+| **Atividade** | Menu ⋮ → quadro no estilo do GitHub com um quadrado por dia: *Uso*, *Criadas* ou *Feitas*, mais totais do ano e sequência de dias concluindo. |
 
 **Ordem da lista:** pendentes primeiro → importantes no topo → mais recentes antes.
 
@@ -38,7 +39,7 @@ Kotlin · Jetpack Compose · Material 3
 
 - Interface **clean**, neutra, com controles arredondados e campo em cápsula.
 - Lista sem cartões; ações de tarefa reunidas no menu ⋮.
-- Mago assassino original em pixel art detalhada no estado vazio e no ícone.
+- Mago assassino original em pixel art no cabeçalho de todas as telas, no estado vazio e no ícone.
 - Brasas pixeladas atravessam a tela devagar, também no widget, com movimento contínuo.
 - Mago no cabeçalho do widget.
 - Tema escuro fixo, sem verde, com widget na mesma paleta.
@@ -48,6 +49,8 @@ Kotlin · Jetpack Compose · Material 3
 ### Dados
 
 - Tudo fica salvo **só no celular** (SharedPreferences, em JSON). Sem conta, sem internet.
+- O histórico da Atividade (criadas/feitas por dia) é guardado à parte e continua mesmo
+  se as tarefas forem excluídas.
 - O backup automático do Android (`allowBackup`) pode levar as tarefas para um celular novo.
 
 ---
@@ -96,9 +99,13 @@ app/src/main/java/com/dkt/todo/
 ├── TarefasWidget.kt       # Widget (Glance): lista, checkbox e botão +
 ├── data/
 │   ├── Task.kt            # Modelo da tarefa
-│   └── TaskStore.kt       # Salvar/carregar + Flow de mudanças
+│   ├── DayActivity.kt     # Criadas/feitas em um dia
+│   └── TaskStore.kt       # Salvar/carregar, histórico diário + Flow de mudanças
 └── ui/
+    ├── ChecklistApp.kt    # Navegação entre lista e atividade
+    ├── ScreenHeader.kt    # Cabeçalho com o mago
     ├── TodoScreen.kt      # Tela principal: lista, filtros, campo, menu
+    ├── ActivityScreen.kt  # Atividade: quadro de dias e totais
     ├── TaskRow.kt         # Linha da tarefa
     ├── EditTaskDialog.kt  # Diálogo de edição
     ├── PixelArt.kt        # Personagem e ícones de ação

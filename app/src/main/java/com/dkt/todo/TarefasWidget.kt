@@ -87,7 +87,10 @@ class CompleteTaskAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         val id = parameters[TaskIdKey] ?: return
         val store = TaskStore(context)
-        store.save(store.load().map { if (it.id == id) it.copy(done = true) else it })
+        val tasks = store.load()
+        if (tasks.none { it.id == id && !it.done }) return
+        store.logDone(1)
+        store.save(tasks.map { if (it.id == id) it.copy(done = true) else it })
         TarefasWidget().update(context, glanceId)
     }
 }
@@ -118,7 +121,7 @@ private fun WidgetContent(tasks: List<Task>) {
             Image(
                 provider = ImageProvider(R.drawable.ashen_companion),
                 contentDescription = "Mago assassino",
-                modifier = GlanceModifier.size(32.dp, 48.dp).clickable(openApp),
+                modifier = GlanceModifier.size(40.dp, 60.dp).clickable(openApp),
             )
             Spacer(GlanceModifier.width(8.dp))
             Column(modifier = GlanceModifier.defaultWeight().clickable(openApp)) {

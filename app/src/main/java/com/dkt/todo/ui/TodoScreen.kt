@@ -54,10 +54,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -87,7 +87,7 @@ enum class Filter(val label: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
+fun TodoScreen(store: TaskStore, focusTick: Int = 0, onOpenActivity: () -> Unit = {}) {
     var tasks by remember { mutableStateOf(store.load()) }
     var filter by rememberSaveable { mutableStateOf(Filter.ALL) }
     var input by rememberSaveable { mutableStateOf("") }
@@ -104,9 +104,12 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
         store.changes().collect { tasks = it }
     }
 
-    // Aberto pelo "+" do widget: foca o campo e abre o teclado
+    // Aberto pelo "+" do widget: foca o campo e abre o teclado (uma vez por toque no "+",
+    // mesmo voltando da tela de atividade)
+    var handledTick by rememberSaveable { mutableIntStateOf(0) }
     LaunchedEffect(focusTick) {
-        if (focusTick > 0) {
+        if (focusTick > handledTick) {
+            handledTick = focusTick
             delay(250)
             try {
                 focusRequester.requestFocus()
@@ -126,6 +129,7 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
         val text = input.trim()
         if (text.isEmpty()) return
         val id = maxOf(System.currentTimeMillis(), (tasks.maxOfOrNull { it.id } ?: 0L) + 1)
+        store.logCreated()
         update(tasks + Task(id = id, title = text))
         input = ""
     }
@@ -178,28 +182,26 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
         else -> "$pending pendentes"
     }
 
-    Box(Modifier.fillMaxSize()) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column {
-                            Text("Checklist", style = MaterialTheme.typography.titleLarge)
-                            Text(
-                                subtitle,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-                },
+            ScreenHeader(
+                title = "Checklist",
+                subtitle = subtitle,
+                // Com a lista vazia o mago aparece grande no meio da tela
+                showCompanion = visible.isNotEmpty(),
                 actions = {
                     Box {
                         IconButton(onClick = { menuOpen = true }) {
                             Icon(Icons.Filled.MoreVert, contentDescription = "Mais opções")
                         }
                         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Atividade") },
+                                onClick = {
+                                    menuOpen = false
+                                    onOpenActivity()
+                                },
+                            )
                             DropdownMenuItem(
                                 text = { Text("Limpar concluídas") },
                                 enabled = tasks.any { it.done },
@@ -274,7 +276,7 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    AshenCompanion(Modifier.size(120.dp, 180.dp))
+                    AshenCompanion(Modifier.size(150.dp, 225.dp))
                     Spacer(Modifier.height(16.dp))
                     Text(
                         when (filter) {
@@ -312,6 +314,7 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
                             TaskRow(
                                 task = task,
                                 onToggle = {
+                                    store.logDone(if (task.done) -1 else 1)
                                     update(tasks.map { if (it.id == task.id) it.copy(done = !it.done) else it })
                                 },
                                 onStar = {
@@ -325,9 +328,6 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
                 }
             }
         }
-    }
-
-    AmbientEmbers(Modifier.matchParentSize())
     }
 
     editing?.let { task ->

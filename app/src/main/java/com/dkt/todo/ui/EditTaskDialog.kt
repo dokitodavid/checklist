@@ -26,6 +26,7 @@ fun EditTaskDialog(
     var text by remember(task.id) { mutableStateOf(task.title) }
     AlertDialog(
         onDismissRequest = onDismiss,
+        icon = { AshenCompanion(Modifier.size(48.dp, 72.dp), animated = false) },
         title = { Text("Editar tarefa") },
         text = {
             OutlinedTextField(
