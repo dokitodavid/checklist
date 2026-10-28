@@ -13,6 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # traz as tags, usadas para numerar a versão
+
+      # Próxima versão = número de releases já publicadas + 1 (builds que falham não contam)
+      - name: Definir versão
+        id: versao
+        run: echo "numero=$(( $(git tag -l 'v*' | wc -l) + 1 ))" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-java@v4
         with:
@@ -30,6 +37,6 @@ jobs:
       - name: Publicar na aba Releases
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ github.run_number }}
-          name: Tarefas v${{ github.run_number }}
+          tag_name: v${{ steps.versao.outputs.numero }}
+          name: Tarefas v${{ steps.versao.outputs.numero }}
           files: Tarefas.apk

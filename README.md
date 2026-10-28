@@ -55,8 +55,8 @@ O APK é gerado pelo GitHub Actions — não precisa do Android Studio.
 3. Aba **Releases** → baixe o `Tarefas.apk` pelo celular e instale
    (o Android pede para permitir “fontes desconhecidas”).
 
-Cada push na `main` gera uma release nova (`v1`, `v2`, …). Também dá pra rodar
-manualmente em **Actions → Build APK → Run workflow**.
+Cada build com sucesso na `main` gera uma release nova (`v1`, `v2`, …);
+builds que falham não pulam número. Também dá pra rodar manualmente em **Actions → Build APK → Run workflow**.
 
 > O APK é sempre assinado com a mesma chave (`app/tarefas.keystore`), então a
 > versão nova instala **por cima** da antiga sem perder as tarefas.
