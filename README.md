@@ -15,33 +15,39 @@ Kotlin · Jetpack Compose · Material 3
 
 | | |
 |---|---|
-| **Adicionar** | Digite no campo de baixo e toque em enviar (ou Enter). |
-| **Concluir** | Toque no checkbox. A tarefa fica riscada e desce para o fim da lista. |
-| **Importante** | Menu ⋮ da tarefa → Marcar importante. Importantes sobem para o topo. |
+| **Adicionar** | Digite no campo de baixo e toque em enviar (ou Enter). A tarefa nova entra no topo. |
+| **Concluir** | Toque no checkbox ou **arraste a tarefa para a direita**. Ela fica riscada e vai para *Concluídas*. Arrastar para a direita uma feita reabre. |
+| **Excluir** | **Arraste para a esquerda** (ou menu ⋮ → Excluir), com **Desfazer** na barra de baixo por alguns segundos. |
+| **Reordenar** | **Segure e arraste** uma pendente para mudar a ordem. A ordem é sua: nada muda de lugar sozinho. |
+| **Data e lembrete** | No diálogo de edição: escolha o dia e, se quiser, o horário do lembrete (notificação com botão **Concluir**). A data aparece embaixo do título, em vermelho se estiver atrasada. |
+| **Organizar por data** | Ícone de calendário no topo da lista (aparece quando há tarefas com data): põe as pendentes em ordem de data, com Desfazer. |
+| **Importante** | Menu ⋮ da tarefa → Marcar importante (aparece uma estrela). |
 | **Editar** | Toque no texto da tarefa para abrir o diálogo de edição. |
-| **Excluir** | Menu ⋮ da tarefa → Excluir, com **Desfazer** na barra de baixo por alguns segundos. |
 | **Filtrar** | Chips no topo: *Todas* · *Pendentes* · *Feitas*. |
 | **Limpar concluídas** | Menu ⋮ → remove todas as feitas de uma vez (também dá pra desfazer). |
 | **Contador** | Abaixo do título: “3 pendentes”, “1 pendente” ou “Tudo em dia”. |
 | **Atividade** | Tela inicial: o mago em destaque, atalhos *Todas* · *Pendentes* · *Feitas* (com contagem) que abrem a lista filtrada, botão **Nova tarefa** e quadro no estilo do GitHub com um quadrado por dia (*Uso*, *Criadas* ou *Feitas*), totais do ano e sequência. |
 
-**Ordem da lista:** pendentes primeiro → importantes no topo → mais recentes antes.
+**Ordem da lista:** pendentes primeiro, na ordem que você definir; depois as concluídas.
+
+**Lembretes:** na primeira vez o Android pede permissão para notificações. Os lembretes são
+reagendados sozinhos depois de reiniciar o celular ou atualizar o app.
 
 ### Widget da tela inicial
 
-- Mostra as tarefas **pendentes**, com as importantes marcadas pela estrela.
-- Toque no checkbox para concluir direto do widget, sem abrir o app.
-- Botão **+** abre o app já com o teclado pronto para digitar.
+- Quadro de atividade no estilo do GitHub (últimas 16 semanas, tarefas criadas + feitas),
+  com o dia de hoje contornado e o mago translúcido ao fundo.
+- Mostra quantas estão pendentes, quantas foram feitas hoje e a sequência de dias.
+- Botão **+** abre o app já com o teclado pronto para digitar; tocar no resto abre o app.
 - Atualiza sozinho quando algo muda no app (e vice-versa).
 - Redimensionável (padrão 3×2).
 
 ### Visual
 
 - Interface **clean**, neutra, com controles arredondados e campo em cápsula.
-- Lista sem cartões; ações de tarefa reunidas no menu ⋮.
+- Lista sem cartões; gestos para concluir, excluir e reordenar, e o resto no menu ⋮.
 - Mago assassino original em pixel art: em destaque na Atividade, grande e translúcido ao fundo das listas, no widget e no ícone.
 - Brasas pixeladas atravessam a tela devagar, também no widget, com movimento contínuo.
-- Mago no cabeçalho do widget.
 - Tema escuro fixo, sem verde, com widget na mesma paleta.
 - Artes locais em alta resolução; ícone adaptativo e monocromático para Android 13+.
 - [Guia visual e limites de validação](design/README.md); [favicon PNG](design/favicon.png).
@@ -96,13 +102,15 @@ celular conectado (depuração USB ativada).
 ```
 app/src/main/java/com/dkt/todo/
 ├── MainActivity.kt        # Activity; trata o atalho "+" do widget
-├── TarefasWidget.kt       # Widget (Glance): lista, checkbox e botão +
+├── TarefasWidget.kt       # Widget (Glance): quadro de atividade, mago e botão +
+├── Reminders.kt           # Lembretes: alarmes, notificação e reagendar ao reiniciar
 ├── data/
 │   ├── Task.kt            # Modelo da tarefa
 │   ├── DayActivity.kt     # Criadas/feitas em um dia
 │   └── TaskStore.kt       # Salvar/carregar, histórico diário + Flow de mudanças
 └── ui/
     ├── ChecklistApp.kt    # Navegação entre lista e atividade
+    ├── SwipeableTask.kt   # Arrastar para os lados: concluir / excluir
     ├── ScreenHeader.kt    # Cabeçalho com o mago
     ├── TodoScreen.kt      # Tela principal: lista, filtros, campo, menu
     ├── ActivityScreen.kt  # Atividade: quadro de dias e totais

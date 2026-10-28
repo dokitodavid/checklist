@@ -62,4 +62,6 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.glance:glance-appwidget:1.1.1")
+    // Segurar e arrastar para reordenar a lista
+    implementation("sh.calvin.reorderable:reorderable:2.4.3")
 }

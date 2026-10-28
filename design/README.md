@@ -35,8 +35,9 @@ No widget, `AndroidRemoteViews` incorpora um `ProgressBar` indeterminado cujo de
 com os mesmos pixels âmbar do app, gerada por `design/gerar_brasas_widget.py`. O launcher
 roda essa animação sozinho, sem serviço, atualização periódica ou rede, e ela não depende
 da escala de animação do sistema. Com economia de energia ativa, o widget usa a composição
-estática `embers_still.xml`. O mago fica sempre no cabeçalho do widget. Os controles de
-adicionar e concluir continuam em Glance.
+estática `embers_still.xml`. O widget mostra o quadro de atividade
+(desenhado como imagem) com o mago translúcido ao fundo (`companion_widget_bg.png`, com a
+transparência já aplicada) e o botão de adicionar em Glance.
 
 Todas as imagens são locais. Para uma interface web, copie `favicon.png` para
 seus arquivos públicos e use `<link rel="icon" href="/favicon.png" type="image/png">`.

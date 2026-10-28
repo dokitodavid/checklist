@@ -2,6 +2,7 @@ package com.dkt.todo.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.dkt.todo.Reminders
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -16,6 +17,7 @@ import java.time.ZoneId
  * diário de criadas/feitas ("activity"), que continua mesmo se as tarefas forem excluídas.
  */
 class TaskStore(context: Context) {
+    private val appContext = context.applicationContext
     private val prefs = context.getSharedPreferences("tarefas", Context.MODE_PRIVATE)
 
     init {
@@ -37,11 +39,15 @@ class TaskStore(context: Context) {
             val arr = JSONArray(raw)
             (0 until arr.length()).map { i ->
                 val o = arr.getJSONObject(i)
+                val id = o.getLong("id")
                 Task(
-                    id = o.getLong("id"),
+                    id = id,
                     title = o.getString("title"),
                     done = o.optBoolean("done", false),
                     important = o.optBoolean("important", false),
+                    position = if (o.has("position")) o.getLong("position") else -id,
+                    dueDate = if (o.has("dueDate")) o.getLong("dueDate") else null,
+                    remindAt = if (o.has("remindAt")) o.getInt("remindAt") else null,
                 )
             }
         } catch (e: Exception) {
@@ -58,9 +64,16 @@ class TaskStore(context: Context) {
                     .put("title", t.title)
                     .put("done", t.done)
                     .put("important", t.important)
+                    .put("position", t.position)
+                    .apply {
+                        t.dueDate?.let { put("dueDate", it) }
+                        t.remindAt?.let { put("remindAt", it) }
+                    }
             )
         }
         prefs.edit().putString("items", arr.toString()).apply()
+        // Toda gravação reagenda os lembretes (app, widget ou notificação)
+        Reminders.sync(appContext, tasks)
     }
 
     /** Emite a lista sempre que ela muda (usado pelo app e pelo widget). */

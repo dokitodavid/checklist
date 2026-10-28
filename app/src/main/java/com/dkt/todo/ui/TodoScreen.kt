@@ -1,5 +1,9 @@
 package com.dkt.todo.ui
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.horizontalScroll
@@ -31,10 +35,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -68,17 +74,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import com.dkt.todo.Reminders
 import com.dkt.todo.TarefasWidget
 import com.dkt.todo.data.Task
 import com.dkt.todo.data.TaskStore
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 enum class Filter(val label: String) {
     ALL("Todas"),
@@ -104,6 +115,7 @@ fun TodoScreen(
     val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
+    val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     // Mantém a tela em dia quando algo é marcado pelo widget
     LaunchedEffect(Unit) {
@@ -135,8 +147,10 @@ fun TodoScreen(
         val text = input.trim()
         if (text.isEmpty()) return
         val id = maxOf(System.currentTimeMillis(), (tasks.maxOfOrNull { it.id } ?: 0L) + 1)
+        // Tarefa nova entra no topo da lista
+        val position = (tasks.minOfOrNull { it.position } ?: 0L) - 1
         store.logCreated()
-        update(tasks + Task(id = id, title = text))
+        update(tasks + Task(id = id, title = text, position = position))
         input = ""
     }
 
@@ -159,6 +173,29 @@ fun TodoScreen(
         undoable("Tarefa excluída", listOf(task))
     }
 
+    fun toggle(task: Task) {
+        store.logDone(if (task.done) -1 else 1)
+        update(tasks.map { if (it.id == task.id) it.copy(done = !it.done) else it })
+    }
+
+    /** Reordena as pendentes pela data (e horário); as sem data ficam depois, na ordem atual. */
+    fun organizeByDate() {
+        val before = tasks
+        val ordered = tasks.filter { !it.done }.sortedWith(
+            compareBy<Task> { it.dueDate == null }
+                .thenBy { it.dueDate }
+                .thenBy { it.remindAt ?: Int.MAX_VALUE }
+                .thenBy { it.position }
+        )
+        val newPos = ordered.withIndex().associate { (i, t) -> t.id to i.toLong() }
+        update(tasks.map { t -> newPos[t.id]?.let { t.copy(position = it) } ?: t })
+        scope.launch {
+            snackbar.currentSnackbarData?.dismiss()
+            val result = snackbar.showSnackbar("Organizado por data", "Desfazer", duration = SnackbarDuration.Short)
+            if (result == SnackbarResult.ActionPerformed) update(before)
+        }
+    }
+
     fun clearDone() {
         val done = tasks.filter { it.done }
         if (done.isEmpty()) return
@@ -166,7 +203,7 @@ fun TodoScreen(
         undoable("${done.size} concluída(s) removida(s)", done)
     }
 
-    // Pendentes antes das feitas; dentro de cada grupo, importantes no topo e as mais novas primeiro
+    // Pendentes antes das feitas; dentro de cada grupo, a ordem manual (arrastar para reordenar)
     val visible = tasks
         .filter {
             when (filter) {
@@ -175,11 +212,21 @@ fun TodoScreen(
                 Filter.DONE -> it.done
             }
         }
-        .sortedWith(
-            compareBy<Task> { it.done }
-                .thenByDescending { it.important }
-                .thenByDescending { it.id }
-        )
+        .sortedWith(compareBy<Task> { it.done }.thenBy { it.position })
+
+    // Arrastar para reordenar: troca a posição na memória enquanto arrasta e grava ao soltar
+    val listState = rememberLazyListState()
+    val haptics = LocalHapticFeedback.current
+    val reorderState = rememberReorderableLazyListState(listState) { from, to ->
+        val order = tasks.filter { !it.done }.sortedBy { it.position }.map { it.id }.toMutableList()
+        val fromIndex = order.indexOf(from.key as Long)
+        val toIndex = order.indexOf(to.key as Long)
+        if (fromIndex < 0 || toIndex < 0) return@rememberReorderableLazyListState
+        order.add(toIndex, order.removeAt(fromIndex))
+        val newPos = order.withIndex().associate { (i, id) -> id to i.toLong() }
+        tasks = tasks.map { t -> newPos[t.id]?.let { t.copy(position = it) } ?: t }
+        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+    }
 
     val pending = tasks.count { !it.done }
     val subtitle = when (pending) {
@@ -200,6 +247,11 @@ fun TodoScreen(
                     }
                 },
                 actions = {
+                    if (tasks.any { !it.done && it.dueDate != null }) {
+                        IconButton(onClick = { organizeByDate() }) {
+                            Icon(Icons.Filled.DateRange, contentDescription = "Organizar por data")
+                        }
+                    }
                     Box {
                         IconButton(onClick = { menuOpen = true }) {
                             Icon(Icons.Filled.MoreVert, contentDescription = "Mais opções")
@@ -306,26 +358,39 @@ fun TodoScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
+                    state = listState,
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(0.dp),
                 ) {
                     items(visible, key = { it.id }) { task ->
-                        Column(Modifier.animateItem()) {
-                            if (filter == Filter.ALL && task.done && task.id == visible.firstOrNull { it.done }?.id) {
-                                Text("Concluídas", modifier = Modifier.padding(start = 12.dp, top = 20.dp, bottom = 8.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                            TaskRow(
-                                task = task,
-                                onToggle = {
-                                    store.logDone(if (task.done) -1 else 1)
-                                    update(tasks.map { if (it.id == task.id) it.copy(done = !it.done) else it })
-                                },
-                                onStar = {
-                                    update(tasks.map { if (it.id == task.id) it.copy(important = !it.important) else it })
-                                },
-                                onEdit = { editing = task },
-                                onDelete = { delete(task) },
+                        // Só as pendentes se reordenam (e não no filtro Feitas)
+                        ReorderableItem(reorderState, key = task.id, enabled = !task.done && filter != Filter.DONE) { dragging ->
+                            val dragHandle = Modifier.longPressDraggableHandle(
+                                onDragStarted = { haptics.performHapticFeedback(HapticFeedbackType.LongPress) },
+                                onDragStopped = { update(tasks) },
                             )
+                            Column {
+                                if (filter == Filter.ALL && task.done && task.id == visible.firstOrNull { it.done }?.id) {
+                                    Text("Concluídas", modifier = Modifier.padding(start = 12.dp, top = 20.dp, bottom = 8.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                SwipeableTask(
+                                    task = task,
+                                    onToggle = { toggle(task) },
+                                    onDelete = { delete(task) },
+                                ) {
+                                    TaskRow(
+                                        task = task,
+                                        onToggle = { toggle(task) },
+                                        onStar = {
+                                            update(tasks.map { if (it.id == task.id) it.copy(important = !it.important) else it })
+                                        },
+                                        onEdit = { editing = task },
+                                        onDelete = { delete(task) },
+                                        dragging = dragging,
+                                        modifier = dragHandle,
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -338,9 +403,15 @@ fun TodoScreen(
         EditTaskDialog(
             task = task,
             onDismiss = { editing = null },
-            onSave = { title ->
-                update(tasks.map { if (it.id == task.id) it.copy(title = title) else it })
+            onSave = { title, dueDate, remindAt ->
+                update(tasks.map {
+                    if (it.id == task.id) it.copy(title = title, dueDate = dueDate, remindAt = remindAt) else it
+                })
                 editing = null
+                // Lembrete precisa da permissão de notificação (Android 13+)
+                if (remindAt != null && !Reminders.canNotify(context) && Build.VERSION.SDK_INT >= 33) {
+                    notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
             },
         )
     }

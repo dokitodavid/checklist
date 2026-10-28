@@ -1,16 +1,16 @@
 package com.dkt.todo
 
 import android.content.Context
-import android.widget.RemoteViews
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.os.PowerManager
-import androidx.glance.appwidget.AndroidRemoteViews
-import androidx.glance.LocalContext
+import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.glance.unit.ColorProvider
-import com.dkt.todo.ui.theme.AshenColors
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.ColorFilter
@@ -19,53 +19,62 @@ import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.LocalContext
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
-import androidx.glance.appwidget.CheckBox
-import androidx.glance.appwidget.CheckboxDefaults
+import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import androidx.glance.appwidget.action.ActionCallback
-import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
-import androidx.glance.appwidget.lazy.LazyColumn
-import androidx.glance.appwidget.lazy.items
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.updateAll
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
+import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
+import com.dkt.todo.data.DayActivity
 import com.dkt.todo.data.Task
 import com.dkt.todo.data.TaskStore
+import com.dkt.todo.ui.HeatColors
+import com.dkt.todo.ui.Metric
+import com.dkt.todo.ui.heatLevel
+import com.dkt.todo.ui.streak
+import com.dkt.todo.ui.theme.AshenColors
+import java.time.LocalDate
 
-/** Chaves dos parâmetros passados pelos botões do widget. */
-val TaskIdKey = ActionParameters.Key<Long>("taskId")
+/** Parâmetro do botão "+": abre o app já com o teclado no campo de nova tarefa. */
 val FocusInputKey = ActionParameters.Key<Boolean>(EXTRA_FOCUS_INPUT)
+
+/** Quantas semanas o quadro do widget mostra. */
+private const val WIDGET_WEEKS = 16
 
 class TarefasWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val store = TaskStore(context)
         provideContent {
-            // Recompõe sozinho sempre que as tarefas mudam (no app ou no próprio widget)
+            // Recompõe sozinho sempre que as tarefas mudam no app
             val flow = remember { store.changes() }
             val tasks by flow.collectAsState(initial = store.load())
+            val activity = remember(tasks) { store.activity() }
             GlanceTheme {
-                WidgetContent(tasks)
+                WidgetContent(tasks, activity)
             }
         }
     }
@@ -81,136 +90,113 @@ class TarefasWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = TarefasWidget()
 }
 
-/** Marca a tarefa como feita quando o checkbox do widget é tocado. */
-class CompleteTaskAction : ActionCallback {
-    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
-        val id = parameters[TaskIdKey] ?: return
-        val store = TaskStore(context)
-        val tasks = store.load()
-        if (tasks.none { it.id == id && !it.done }) return
-        store.logDone(1)
-        store.save(tasks.map { if (it.id == id) it.copy(done = true) else it })
-        TarefasWidget().update(context, glanceId)
+/** Quadro de atividade (estilo GitHub) com o mago translúcido ao fundo e as brasas por cima. */
+@Composable
+private fun WidgetContent(tasks: List<Task>, activity: Map<LocalDate, DayActivity>) {
+    val context = LocalContext.current
+    val today = LocalDate.now()
+    val pending = tasks.count { !it.done }
+    val doneToday = activity[today]?.done ?: 0
+    val streak = streak(activity, today)
+    val heatmap = remember(activity, today) { heatmapBitmap(activity, today, WIDGET_WEEKS) }
+    val openApp = actionStartActivity<MainActivity>()
+    val batterySaver = (context.getSystemService(Context.POWER_SERVICE) as PowerManager).isPowerSaveMode
+
+    Box(GlanceModifier.fillMaxSize().appWidgetBackground().background(ColorProvider(AshenColors.Night)).cornerRadius(20.dp)) {
+        // Mago ao fundo, já com a transparência aplicada na imagem
+        Box(GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Image(
+                provider = ImageProvider(R.drawable.companion_widget_bg),
+                contentDescription = null,
+                modifier = GlanceModifier.fillMaxSize(),
+                contentScale = ContentScale.Fit,
+            )
+        }
+        Column(GlanceModifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 10.dp)) {
+            Row(
+                modifier = GlanceModifier.fillMaxWidth().padding(start = 4.dp, bottom = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = GlanceModifier.defaultWeight().clickable(openApp)) {
+                    Text(
+                        text = "Checklist",
+                        style = TextStyle(fontWeight = FontWeight.Medium, fontSize = 17.sp, color = ColorProvider(AshenColors.Parchment)),
+                    )
+                    Text(
+                        text = when (pending) {
+                            0 -> "Tudo em dia"
+                            1 -> "1 pendente"
+                            else -> "$pending pendentes"
+                        },
+                        style = TextStyle(fontSize = 12.sp, color = ColorProvider(AshenColors.Muted)),
+                    )
+                }
+                Spacer(GlanceModifier.width(8.dp))
+                Box(
+                    modifier = GlanceModifier
+                        .size(36.dp)
+                        .cornerRadius(18.dp)
+                        .background(ColorProvider(AshenColors.Raised))
+                        .clickable(actionStartActivity<MainActivity>(actionParametersOf(FocusInputKey to true))),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Image(
+                        provider = ImageProvider(R.drawable.ic_add),
+                        contentDescription = "Adicionar tarefa",
+                        colorFilter = ColorFilter.tint(ColorProvider(AshenColors.Muted)),
+                        modifier = GlanceModifier.size(20.dp),
+                    )
+                }
+            }
+            Image(
+                provider = ImageProvider(heatmap),
+                contentDescription = "Atividade das últimas $WIDGET_WEEKS semanas",
+                modifier = GlanceModifier.fillMaxWidth().defaultWeight().clickable(openApp),
+                contentScale = ContentScale.Fit,
+            )
+            Spacer(GlanceModifier.height(6.dp))
+            Text(
+                text = "$doneToday feita(s) hoje · sequência de $streak dia(s)",
+                modifier = GlanceModifier.padding(start = 4.dp),
+                style = TextStyle(fontSize = 12.sp, color = ColorProvider(AshenColors.Muted)),
+            )
+        }
+        AndroidRemoteViews(
+            remoteViews = RemoteViews(context.packageName, if (batterySaver) R.layout.widget_embers_still else R.layout.widget_embers),
+            modifier = GlanceModifier.fillMaxSize(),
+        )
     }
 }
 
-@Composable
-private fun WidgetContent(tasks: List<Task>) {
-    val pending = tasks
-        .filter { !it.done }
-        .sortedWith(compareByDescending<Task> { it.important }.thenByDescending { it.id })
-
-    val openApp = actionStartActivity<MainActivity>()
-
-    val context = LocalContext.current
-    val batterySaver = (context.getSystemService(Context.POWER_SERVICE) as PowerManager).isPowerSaveMode
-    Box(GlanceModifier.fillMaxSize().appWidgetBackground().background(ColorProvider(AshenColors.Night)).cornerRadius(20.dp)) {
-    Column(
-        modifier = GlanceModifier
-            .fillMaxSize()
-            .background(ColorProvider(AshenColors.Night))
-            .cornerRadius(20.dp)
-            .padding(horizontal = 12.dp, vertical = 10.dp)
-    ) {
-        Row(
-            modifier = GlanceModifier.fillMaxWidth().padding(start = 4.dp, bottom = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Image(
-                provider = ImageProvider(R.drawable.ashen_companion),
-                contentDescription = "Mago assassino",
-                modifier = GlanceModifier.size(40.dp, 60.dp).clickable(openApp),
-            )
-            Spacer(GlanceModifier.width(8.dp))
-            Column(modifier = GlanceModifier.defaultWeight().clickable(openApp)) {
-                Text(
-                    text = "Checklist",
-                    style = TextStyle(
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 17.sp,
-                        color = ColorProvider(AshenColors.Parchment),
-                    ),
-                )
-                Text(
-                    text = when (pending.size) {
-                        0 -> "Tudo em dia"
-                        1 -> "1 pendente"
-                        else -> "${pending.size} pendentes"
-                    },
-                    style = TextStyle(fontSize = 12.sp, color = ColorProvider(AshenColors.Muted)),
-                )
-            }
-            Spacer(GlanceModifier.width(8.dp))
-            Box(
-                modifier = GlanceModifier
-                    .size(36.dp)
-                    .cornerRadius(18.dp)
-                    .background(ColorProvider(AshenColors.Raised))
-                    .clickable(
-                        actionStartActivity<MainActivity>(actionParametersOf(FocusInputKey to true))
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                Image(
-                    provider = ImageProvider(R.drawable.ic_add),
-                    contentDescription = "Adicionar tarefa",
-                    colorFilter = ColorFilter.tint(ColorProvider(AshenColors.Muted)),
-                    modifier = GlanceModifier.size(20.dp),
-                )
-            }
-        }
-
-        if (pending.isEmpty()) {
-            Box(
-                modifier = GlanceModifier.fillMaxSize().clickable(openApp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "Nada pendente",
-                    style = TextStyle(fontSize = 14.sp, color = ColorProvider(AshenColors.Muted)),
-                )
-                }
-            }
-        } else {
-            LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
-                items(pending, itemId = { it.id }) { task ->
-                    Row(
-                        modifier = GlanceModifier.fillMaxWidth().padding(vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        CheckBox(
-                            checked = false,
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = ColorProvider(AshenColors.Parchment),
-                                uncheckedColor = ColorProvider(AshenColors.Muted),
-                            ),
-                            onCheckedChange = actionRunCallback<CompleteTaskAction>(
-                                actionParametersOf(TaskIdKey to task.id)
-                            ),
-                        )
-                        Text(
-                            text = task.title,
-                            maxLines = 2,
-                            style = TextStyle(fontSize = 14.sp, color = ColorProvider(AshenColors.Parchment)),
-                            modifier = GlanceModifier.defaultWeight().clickable(openApp),
-                        )
-                        if (task.important) {
-                            Image(
-                                provider = ImageProvider(R.drawable.ic_star),
-                                contentDescription = "Importante",
-                                modifier = GlanceModifier.size(16.dp).padding(start = 2.dp),
-                            )
-                        }
-                    }
-                }
-            }
+/**
+ * Desenha o quadro como imagem: widgets não aceitam muitos elementos, e um bitmap mostra
+ * quantas semanas quiser. Colunas de domingo a sábado; a última é a semana de hoje.
+ */
+private fun heatmapBitmap(activity: Map<LocalDate, DayActivity>, today: LocalDate, weeks: Int): Bitmap {
+    val cell = 30f
+    val gap = 8f
+    val step = cell + gap
+    val bitmap = Bitmap.createBitmap((weeks * step - gap).toInt(), (7 * step - gap).toInt(), Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    val fill = Paint(Paint.ANTI_ALIAS_FLAG)
+    val outline = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeWidth = 3f
+        color = AshenColors.Parchment.copy(alpha = 0.7f).toArgb()
+    }
+    val lastSunday = today.minusDays((today.dayOfWeek.value % 7).toLong())
+    val firstDay = lastSunday.minusWeeks((weeks - 1).toLong())
+    val max = (0 until weeks * 7).maxOf { Metric.USE.of(activity[firstDay.plusDays(it.toLong())]) }
+    for (w in 0 until weeks) {
+        for (d in 0 until 7) {
+            val day = firstDay.plusDays(w * 7L + d)
+            if (day.isAfter(today)) continue
+            val x = w * step
+            val y = d * step
+            fill.color = HeatColors[heatLevel(Metric.USE.of(activity[day]), max)].toArgb()
+            canvas.drawRoundRect(x, y, x + cell, y + cell, 7f, 7f, fill)
+            if (day == today) canvas.drawRoundRect(x + 1.5f, y + 1.5f, x + cell - 1.5f, y + cell - 1.5f, 7f, 7f, outline)
         }
     }
-    AndroidRemoteViews(
-        remoteViews = RemoteViews(context.packageName, if (batterySaver) R.layout.widget_embers_still else R.layout.widget_embers),
-        modifier = GlanceModifier.fillMaxSize(),
-    )
-    }
-
+    return bitmap
 }

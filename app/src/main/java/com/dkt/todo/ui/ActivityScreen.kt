@@ -258,7 +258,7 @@ private fun Heatmap(
                             } else {
                                 val value = metric.of(activity[day])
                                 Cell(
-                                    color = levelColor(level(value, max)),
+                                    color = levelColor(heatLevel(value, max)),
                                     selected = day == selected,
                                     modifier = Modifier
                                         .clickable { onSelect(day) }
@@ -308,21 +308,23 @@ private fun Stat(title: String, value: String, caption: String, modifier: Modifi
     }
 }
 
-/** 0 = sem atividade; 1–4 = quartos do dia mais ativo do período. */
-private fun level(value: Int, max: Int): Int =
+/** 0 = sem atividade; 1–4 = quartos do dia mais ativo do período (também usado pelo widget). */
+fun heatLevel(value: Int, max: Int): Int =
     if (value <= 0 || max <= 0) 0 else ceil(value * 4.0 / max).toInt().coerceIn(1, 4)
 
-@Composable
-private fun levelColor(level: Int): Color = when (level) {
-    0 -> MaterialTheme.colorScheme.surfaceContainerHighest
-    1 -> AshenColors.Ember.copy(alpha = 0.3f)
-    2 -> AshenColors.Ember.copy(alpha = 0.5f)
-    3 -> AshenColors.Ember.copy(alpha = 0.75f)
-    else -> AshenColors.Ember
-}
+/** Cores dos níveis 0–4 do quadro (também usadas pelo widget). */
+val HeatColors = listOf(
+    AshenColors.Raised,
+    AshenColors.Ember.copy(alpha = 0.3f),
+    AshenColors.Ember.copy(alpha = 0.5f),
+    AshenColors.Ember.copy(alpha = 0.75f),
+    AshenColors.Ember,
+)
+
+private fun levelColor(level: Int): Color = HeatColors[level.coerceIn(0, 4)]
 
 /** Dias seguidos com pelo menos uma tarefa feita, até hoje (ou até ontem, se hoje ainda não teve). */
-private fun streak(activity: Map<LocalDate, DayActivity>, today: LocalDate): Int {
+fun streak(activity: Map<LocalDate, DayActivity>, today: LocalDate): Int {
     var day = if ((activity[today]?.done ?: 0) > 0) today else today.minusDays(1)
     var count = 0
     while ((activity[day]?.done ?: 0) > 0) {
