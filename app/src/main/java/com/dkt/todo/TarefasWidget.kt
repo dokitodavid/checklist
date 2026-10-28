@@ -106,7 +106,7 @@ private fun WidgetContent(tasks: List<Task>) {
         ) {
             Column(modifier = GlanceModifier.defaultWeight().clickable(openApp)) {
                 Text(
-                    text = "Tarefas",
+                    text = "Checklist",
                     style = TextStyle(
                         fontWeight = FontWeight.Medium,
                         fontSize = 17.sp,

@@ -165,7 +165,7 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
             TopAppBar(
                 title = {
                     Column {
-                        Text("Tarefas")
+                        Text("Checklist")
                         Text(
                             subtitle,
                             style = MaterialTheme.typography.bodySmall,

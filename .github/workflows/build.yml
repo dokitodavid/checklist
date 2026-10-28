@@ -32,11 +32,11 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
-          cp app/build/outputs/apk/release/app-release.apk Tarefas.apk
+          cp app/build/outputs/apk/release/app-release.apk Checklist.apk
 
       - name: Publicar na aba Releases
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.versao.outputs.numero }}
-          name: Tarefas v${{ steps.versao.outputs.numero }}
-          files: Tarefas.apk
+          name: Checklist v${{ steps.versao.outputs.numero }}
+          files: Checklist.apk

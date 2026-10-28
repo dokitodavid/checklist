@@ -1,6 +1,6 @@
 <div align="center">
 
-# ✓ Tarefas
+# ✓ Checklist
 
 Lista de tarefas simples e direta para Android.<br>
 Kotlin · Jetpack Compose · Material 3
@@ -52,7 +52,7 @@ O APK é gerado pelo GitHub Actions — não precisa do Android Studio.
 
 1. Faça push (ou merge) na branch `main`.
 2. Aba **Actions** → espere o **Build APK** ficar verde (~3–5 min).
-3. Aba **Releases** → baixe o `Tarefas.apk` pelo celular e instale
+3. Aba **Releases** → baixe o `Checklist.apk` pelo celular e instale
    (o Android pede para permitir “fontes desconhecidas”).
 
 Cada build com sucesso na `main` gera uma release nova (`v1`, `v2`, …);
