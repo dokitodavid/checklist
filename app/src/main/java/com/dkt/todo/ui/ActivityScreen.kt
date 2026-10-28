@@ -334,7 +334,8 @@ private val HeroMageWidth = 196.dp
 
 /**
  * Cenário preenchendo a área inteira do mago, ancorado no topo para mostrar as torres
- * acima do capuz. Só a base e as laterais recebem fade; o mago fica na frente. A capa é
+ * acima do capuz. Um fade curto no topo (6%) evita a borda reta, sem apagar as torres;
+ * a base e as laterais também se integram ao fundo. O mago fica na frente. A capa é
  * assimétrica, então só ele é deslocado 15% da própria largura para a esquerda, para o capuz
  * e o tronco ficarem no eixo da tela e do portal da catedral.
  */
@@ -351,7 +352,13 @@ private fun HeroScene(modifier: Modifier = Modifier) {
         )
         Box(
             Modifier.fillMaxSize().background(
-                Brush.verticalGradient(0f to Color.Transparent, 0.82f to Color.Transparent, 1f to bg)
+                Brush.verticalGradient(
+                    0f to bg,
+                    0.025f to bg.copy(alpha = 0.5f),
+                    0.06f to Color.Transparent,
+                    0.82f to Color.Transparent,
+                    1f to bg,
+                )
             )
         )
         Box(

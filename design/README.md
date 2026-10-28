@@ -26,8 +26,9 @@ monocromática própria. O mago respira com um movimento discreto de 1 dp.
 
 - `ruins_hero.webp` — tela principal (Atividade): novo cenário quadrado com torres estendidas
   acima do capuz, com 65% de opacidade, preenchendo toda a área do mago com Crop e TopCenter.
-  O topo fica visível, sem degradê opaco; o fade é inferior (últimos 18%) e estreito nas
-  laterais (4%). O cenário termina antes dos atalhos Todas/Pendentes/Feitas.
+  O topo tem um fade curto nos primeiros 6% (18 dp na área de 300 dp), removendo a
+  borda reta sem criar uma faixa vazia; o fade inferior ocupa os últimos 18% e o lateral,
+  4%. O cenário termina antes dos atalhos Todas/Pendentes/Feitas.
   A capa do mago é assimétrica, então só o mago é deslocado 15% da própria largura para a
   esquerda, deixando capuz e tronco no eixo da tela e do portal da catedral.
 - `ruins_tabs.webp` — listas: cenário vertical preso à tela (Crop central), com 30% de
