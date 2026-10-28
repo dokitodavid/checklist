@@ -63,6 +63,14 @@ builds que falham não pulam número. Também dá pra rodar manualmente em **Act
 > A chave e a senha estão no repositório de propósito — é um app de uso pessoal.
 > Se um dia for publicar, troque por uma chave privada guardada em *secrets*.
 
+### Atualizações automáticas (Obtainium)
+
+O app não se atualiza sozinho. Para receber as versões novas sem baixar na mão,
+use o [Obtainium](https://github.com/ImranR98/Obtainium) (gratuito):
+**Adicionar app** → `https://github.com/dokitodavid/checklist`.
+O número da versão do app (`versionCode`) é o mesmo da release, então ele sabe
+qual é a mais nova.
+
 ### Pelo Android Studio
 
 Abra a pasta do projeto, espere o Gradle sincronizar e clique em **Run** com o

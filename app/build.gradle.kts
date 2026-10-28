@@ -4,6 +4,9 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+// Número da release (v1, v2, …), passado pelo GitHub Actions com -Pversao=N
+val versao = (findProperty("versao") as String?)?.toInt() ?: 1
+
 android {
     namespace = "com.dkt.todo"
     compileSdk = 35
@@ -12,8 +15,8 @@ android {
         applicationId = "com.dkt.todo"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = versao
+        versionName = versao.toString()
     }
 
     // Chave fixa: assim cada APK novo instala por cima do anterior sem perder as tarefas

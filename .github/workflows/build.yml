@@ -31,7 +31,7 @@ jobs:
       - name: Compilar APK
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+          ./gradlew assembleRelease --no-daemon -Pversao=${{ steps.versao.outputs.numero }}
           cp app/build/outputs/apk/release/app-release.apk Checklist.apk
 
       - name: Publicar na aba Releases
