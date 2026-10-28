@@ -36,8 +36,13 @@ Kotlin · Jetpack Compose · Material 3
 
 ### Visual
 
-- Tema claro/escuro seguindo o sistema.
-- No Android 12+ usa as cores do wallpaper (Material You).
+- Identidade **pixel art / soulslike**: carvão, pedra, brasa e dourado envelhecido.
+- Fogueira original animada em quatro poses, ícones pixelados e painéis com cantos cortados.
+- Progresso animado, transições ao concluir tarefas e reordenação suave da lista.
+- Tema escuro fixo e widget com a mesma paleta, independente do wallpaper.
+- Ícone adaptativo com fogueira e variante monocromática para Android 13+.
+- Arte vetorial local, sem downloads; animações Compose seguem a escala de animação do Android.
+- [Guia visual e validação](design/README.md); [favicon SVG](design/favicon.svg).
 
 ### Dados
 
@@ -95,7 +100,8 @@ app/src/main/java/com/dkt/todo/
     ├── TodoScreen.kt      # Tela principal: lista, filtros, campo, menu
     ├── TaskRow.kt         # Linha da tarefa
     ├── EditTaskDialog.kt  # Diálogo de edição
-    └── theme/Theme.kt     # Tema claro/escuro/dinâmico
+    ├── PixelArt.kt        # Fogueira animada e ícones pixelados
+    └── theme/Theme.kt     # Paleta, tipografia e formas
 
 app/src/main/res/
 ├── drawable/              # Ícones (app, estrela, +)

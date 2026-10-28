@@ -1,5 +1,8 @@
 package com.dkt.todo.ui
 
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
@@ -23,11 +26,13 @@ fun EditTaskDialog(
     var text by remember(task.id) { mutableStateOf(task.title) }
     AlertDialog(
         onDismissRequest = onDismiss,
+        icon = { PixelCampfire(Modifier.size(48.dp, 60.dp), animated = false) },
         title = { Text("Editar tarefa") },
         text = {
             OutlinedTextField(
                 value = text,
                 onValueChange = { text = it },
+                label = { Text("Tarefa") },
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
             )
         },

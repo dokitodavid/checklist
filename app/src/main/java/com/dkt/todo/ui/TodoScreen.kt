@@ -1,5 +1,15 @@
 package com.dkt.todo.ui
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,14 +27,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -52,6 +62,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
@@ -160,17 +171,27 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
         else -> "$pending pendentes"
     }
 
+    val completed = tasks.count { it.done }
+    val progress by animateFloatAsState(
+        if (tasks.isEmpty()) 0f else completed.toFloat() / tasks.size,
+        animationSpec = tween(400), label = "Progresso das tarefas",
+    )
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text("Checklist")
-                        Text(
-                            subtitle,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        PixelCampfire(Modifier.size(48.dp, 60.dp))
+                        Spacer(Modifier.width(12.dp))
+                        Column {
+                            Text("Checklist", style = MaterialTheme.typography.titleLarge)
+                            Text(
+                                subtitle,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                 },
                 actions = {
@@ -193,7 +214,7 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
             )
         },
         bottomBar = {
-            Surface(tonalElevation = 3.dp) {
+            Surface(color = MaterialTheme.colorScheme.surface) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -208,7 +229,8 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
                         modifier = Modifier
                             .weight(1f)
                             .focusRequester(focusRequester),
-                        placeholder = { Text("Nova tarefa…") },
+                        placeholder = { Text("Sua próxima missão…") },
+                        label = { Text("Nova tarefa") },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
                             capitalization = KeyboardCapitalization.Sentences,
@@ -220,12 +242,14 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
                     FilledIconButton(
                         onClick = { add() },
                         enabled = input.isNotBlank(),
+                        modifier = Modifier.size(48.dp),
+                        shape = CutCornerShape(4.dp),
                         colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
                         ),
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Adicionar")
+                        PixelIcon(PixelSymbol.Plus, "Adicionar tarefa", tint = LocalContentColor.current)
                     }
                 }
             }
@@ -237,8 +261,31 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
                 .padding(padding)
                 .fillMaxSize()
         ) {
+            Column(
+                Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                    .fillMaxWidth()
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CutCornerShape(6.dp))
+                    .background(MaterialTheme.colorScheme.surface, CutCornerShape(6.dp))
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Text("UM PASSO A CADA VEZ", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                Text(
+                    if (tasks.isEmpty()) "Toda jornada começa com uma tarefa."
+                    else if (pending == 0) "A jornada de hoje está completa."
+                    else "A chama segue acesa. Continue.",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                LinearProgressIndicator(
+                    progress = { progress }, modifier = Modifier.fillMaxWidth().height(4.dp),
+                    color = MaterialTheme.colorScheme.secondary,
+                    trackColor = MaterialTheme.colorScheme.outlineVariant,
+                    gapSize = 0.dp, drawStopIndicator = {},
+                )
+                Text("$completed de ${tasks.size} concluídas", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
             Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                modifier = Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Filter.entries.forEach { f ->
@@ -251,22 +298,40 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
             }
 
             if (visible.isEmpty()) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Column(
+                    Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    PixelCampfire(Modifier.size(96.dp, 120.dp))
+                    Spacer(Modifier.height(16.dp))
                     Text(
-                        text = when (filter) {
-                            Filter.ALL -> "Nenhuma tarefa ainda.\nDigite lá embaixo pra adicionar."
-                            Filter.PENDING -> "Nada pendente 🎉"
-                            Filter.DONE -> "Nenhuma tarefa concluída."
+                        when (filter) {
+                            Filter.ALL -> "Prepare sua jornada"
+                            Filter.PENDING -> "Descanse junto à fogueira"
+                            Filter.DONE -> "Cada conquista conta"
                         },
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        when (filter) {
+                            Filter.ALL -> "Adicione sua primeira tarefa abaixo."
+                            Filter.PENDING -> "Tudo em dia. Sua próxima missão pode esperar."
+                            Filter.DONE -> "Suas tarefas concluídas aparecerão aqui."
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(32.dp),
+                        textAlign = TextAlign.Center,
                     )
                 }
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 8.dp),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items(visible, key = { it.id }) { task ->
                         Column(Modifier.animateItem()) {
@@ -281,7 +346,6 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0) {
                                 onEdit = { editing = task },
                                 onDelete = { delete(task) },
                             )
-                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
                         }
                     }
                 }

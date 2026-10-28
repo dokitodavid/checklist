@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.Checklist" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#101211</item>
+        <item name="android:colorAccent">#E7AD62</item>
+        <item name="android:statusBarColor">#101211</item>
+        <item name="android:navigationBarColor">#101211</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

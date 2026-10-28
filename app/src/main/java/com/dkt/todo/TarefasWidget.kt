@@ -5,6 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.glance.unit.ColorProvider
+import com.dkt.todo.ui.theme.AshenColors
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.ColorFilter
@@ -18,6 +20,7 @@ import androidx.glance.action.actionParametersOf
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.CheckBox
+import androidx.glance.appwidget.CheckboxDefaults
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.action.ActionCallback
@@ -96,21 +99,26 @@ private fun WidgetContent(tasks: List<Task>) {
         modifier = GlanceModifier
             .fillMaxSize()
             .appWidgetBackground()
-            .background(GlanceTheme.colors.widgetBackground)
-            .cornerRadius(20.dp)
+            .background(ColorProvider(AshenColors.Night))
+            .cornerRadius(4.dp)
             .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
         Row(
             modifier = GlanceModifier.fillMaxWidth().padding(start = 4.dp, bottom = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            Image(
+                provider = ImageProvider(R.drawable.ic_launcher_foreground),
+                contentDescription = "Fogueira em pixel art",
+                modifier = GlanceModifier.size(40.dp),
+            )
             Column(modifier = GlanceModifier.defaultWeight().clickable(openApp)) {
                 Text(
                     text = "Checklist",
                     style = TextStyle(
                         fontWeight = FontWeight.Medium,
                         fontSize = 17.sp,
-                        color = GlanceTheme.colors.onSurface,
+                        color = ColorProvider(AshenColors.Parchment),
                     ),
                 )
                 Text(
@@ -119,15 +127,15 @@ private fun WidgetContent(tasks: List<Task>) {
                         1 -> "1 pendente"
                         else -> "${pending.size} pendentes"
                     },
-                    style = TextStyle(fontSize = 12.sp, color = GlanceTheme.colors.onSurfaceVariant),
+                    style = TextStyle(fontSize = 12.sp, color = ColorProvider(AshenColors.Muted)),
                 )
             }
             Spacer(GlanceModifier.width(8.dp))
             Box(
                 modifier = GlanceModifier
                     .size(36.dp)
-                    .cornerRadius(18.dp)
-                    .background(GlanceTheme.colors.surfaceVariant)
+                    .cornerRadius(2.dp)
+                    .background(ColorProvider(AshenColors.Raised))
                     .clickable(
                         actionStartActivity<MainActivity>(actionParametersOf(FocusInputKey to true))
                     ),
@@ -136,7 +144,7 @@ private fun WidgetContent(tasks: List<Task>) {
                 Image(
                     provider = ImageProvider(R.drawable.ic_add),
                     contentDescription = "Adicionar tarefa",
-                    colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurfaceVariant),
+                    colorFilter = ColorFilter.tint(ColorProvider(AshenColors.Muted)),
                     modifier = GlanceModifier.size(20.dp),
                 )
             }
@@ -149,7 +157,7 @@ private fun WidgetContent(tasks: List<Task>) {
             ) {
                 Text(
                     text = "Nada pendente",
-                    style = TextStyle(fontSize = 14.sp, color = GlanceTheme.colors.onSurfaceVariant),
+                    style = TextStyle(fontSize = 14.sp, color = ColorProvider(AshenColors.Muted)),
                 )
             }
         } else {
@@ -161,6 +169,10 @@ private fun WidgetContent(tasks: List<Task>) {
                     ) {
                         CheckBox(
                             checked = false,
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = ColorProvider(AshenColors.Moss),
+                                uncheckedColor = ColorProvider(AshenColors.Muted),
+                            ),
                             onCheckedChange = actionRunCallback<CompleteTaskAction>(
                                 actionParametersOf(TaskIdKey to task.id)
                             ),
@@ -168,7 +180,7 @@ private fun WidgetContent(tasks: List<Task>) {
                         Text(
                             text = task.title,
                             maxLines = 2,
-                            style = TextStyle(fontSize = 14.sp, color = GlanceTheme.colors.onSurface),
+                            style = TextStyle(fontSize = 14.sp, color = ColorProvider(AshenColors.Parchment)),
                             modifier = GlanceModifier.defaultWeight().clickable(openApp),
                         )
                         if (task.important) {
