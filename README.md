@@ -56,20 +56,19 @@ O APK é gerado pelo GitHub Actions — não precisa do Android Studio.
    (o Android pede para permitir “fontes desconhecidas”).
 
 Cada build com sucesso na `main` gera uma release nova (`v1`, `v2`, …);
-builds que falham não pulam número. Também dá pra rodar manualmente em **Actions → Build APK → Run workflow**.
+builds que falham não pulam número. Também dá pra rodar manualmente em
+**Actions → Build APK → Run workflow**.
+
+Para atualizar o app, baixe o APK da release nova e instale por cima.
+
+**O que mudou:** cada release lista os títulos dos commits desde a anterior.
+Commits com `[skip ci]` na mensagem (mudanças só no README, no workflow etc.)
+não geram release e ficam fora da lista.
 
 > O APK é sempre assinado com a mesma chave (`app/tarefas.keystore`), então a
 > versão nova instala **por cima** da antiga sem perder as tarefas.
 > A chave e a senha estão no repositório de propósito — é um app de uso pessoal.
 > Se um dia for publicar, troque por uma chave privada guardada em *secrets*.
-
-### Atualizações automáticas (Obtainium)
-
-O app não se atualiza sozinho. Para receber as versões novas sem baixar na mão,
-use o [Obtainium](https://github.com/ImranR98/Obtainium) (gratuito):
-**Adicionar app** → `https://github.com/dokitodavid/checklist`.
-O número da versão do app (`versionCode`) é o mesmo da release, então ele sabe
-qual é a mais nova.
 
 ### Pelo Android Studio
 

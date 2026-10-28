@@ -34,9 +34,18 @@ jobs:
           ./gradlew assembleRelease --no-daemon -Pversao=${{ steps.versao.outputs.numero }}
           cp app/build/outputs/apk/release/app-release.apk Checklist.apk
 
+      # Lista os commits desde a última release (ignora os marcados com [skip ci])
+      - name: Notas da versão
+        run: |
+          anterior=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)
+          intervalo=${anterior:+$anterior..}HEAD
+          git log "$intervalo" --no-merges --invert-grep --grep='\[skip ci\]' --pretty='- %s' > notas.md
+          cat notas.md
+
       - name: Publicar na aba Releases
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.versao.outputs.numero }}
           name: Checklist v${{ steps.versao.outputs.numero }}
+          body_path: notas.md
           files: Checklist.apk
