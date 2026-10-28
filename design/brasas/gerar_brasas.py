@@ -1,13 +1,16 @@
-"""Gera os recursos das brasas a partir das artes em design/brasas/.
+"""Gera os recursos das brasas a partir das spritesheets em design/brasas/.
 
-As artes originais vêm ampliadas (cada pixel da arte ocupa ~17–22 px). Este script:
-1. reduz cada uma para a grade original (PNG pequeno, nítido com nearest-neighbor);
-2. gera o vetor animado do widget (cada pixel vira um quadrado do vetor);
-3. gera a versão parada do widget.
+Cada spritesheet tem 24 quadros de cintilação (ver animacao.json), ampliados 4×.
+Este script:
+1. reduz os quadros para o tamanho real da arte e recorta todos na mesma caixa;
+2. salva uma tira horizontal por brasa (ember_*_frames.png), usada pelo app;
+3. gera o vetor animado do widget a partir do primeiro quadro (cada pixel vira um quadrado);
+4. gera a versão parada do widget.
 
 Uso, na raiz do repositório:  python3 design/brasas/gerar_brasas.py
 Requer Pillow e NumPy.
 """
+import json
 import math
 from pathlib import Path
 
@@ -17,41 +20,29 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "design" / "brasas"
 RES = ROOT / "app" / "src" / "main" / "res"
+ANIM = json.loads((SRC / "animacao.json").read_text())
+UPSCALE = 4  # cada pixel da arte ocupa 4×4 px na spritesheet
 
-# arte original → (nome do recurso, pixels de tela por pixel da arte)
+# spritesheet → nome do recurso
 SPRITES = [
-    ("brasa-alongada.png", "ember_long", 17.2),
-    ("brasa-dupla.png", "ember_double", 18.9),
-    ("brasa-fragmento.png", "ember_shard", 22.1),
+    ("brasa-alongada-spritesheet.png", "ember_long"),
+    ("brasa-dupla-spritesheet.png", "ember_double"),
+    ("brasa-fragmento-spritesheet.png", "ember_shard"),
 ]
 
 
-def grid_offset(profile, step):
-    n = len(profile)
-    best = (0.0, 0.0)
-    for off in np.arange(0, step, 0.25):
-        idx = np.round(np.arange(off, n, step)).astype(int)
-        idx = idx[idx < n]
-        best = max(best, (profile[idx].sum(), off))
-    return best[1] + 1  # a borda fica entre o pixel idx e idx+1
-
-
-def downscale(path, step):
-    a = np.asarray(Image.open(path).convert("RGBA")).astype(float)
-    ox = grid_offset(np.abs(np.diff(a, axis=1)).sum(axis=(0, 2)), step)
-    oy = grid_offset(np.abs(np.diff(a, axis=0)).sum(axis=(1, 2)), step)
-    rows, cols = int((a.shape[0] - oy) // step), int((a.shape[1] - ox) // step)
-    cells = np.zeros((rows, cols, 4))
-    for r in range(rows):
-        for c in range(cols):
-            # mediana do miolo de cada célula, longe das bordas suavizadas
-            y0, y1 = int(oy + (r + 0.3) * step), int(oy + (r + 0.7) * step)
-            x0, x1 = int(ox + (c + 0.3) * step), int(ox + (c + 0.7) * step)
-            cells[r, c] = np.median(a[y0:y1, x0:x1].reshape(-1, 4), axis=0)
-    cells[..., 3] = np.where(cells[..., 3] > 128, 255, 0)
-    ys, xs = np.nonzero(cells[..., 3])
-    cells = cells[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
-    return Image.fromarray(cells.astype(np.uint8), "RGBA")
+def load_frames(path):
+    """Devolve os quadros reduzidos, todos recortados na mesma caixa."""
+    sheet = Image.open(path).convert("RGBA")
+    fw, fh, cols = ANIM["frame_width"], ANIM["frame_height"], ANIM["spritesheet_columns"]
+    frames = []
+    for i in range(ANIM["frames"]):
+        x, y = (i % cols) * fw, (i // cols) * fh
+        f = sheet.crop((x, y, x + fw, y + fh))
+        frames.append(f.resize((fw // UPSCALE, fh // UPSCALE), Image.NEAREST))
+    boxes = [f.getbbox() for f in frames]
+    box = (min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes))
+    return [f.crop(box) for f in frames]
 
 
 def color_paths(img, colors=12):
@@ -112,11 +103,15 @@ def particle_group(i, sprite, cx, cy, k, tilt, paths, w, h, alpha):
 
 def main():
     sprites = []
-    for src, name, step in SPRITES:
-        img = downscale(SRC / src, step)
-        img.save(RES / "drawable-nodpi" / f"{name}.png", optimize=True)
-        sprites.append((img, color_paths(img)))
-        print(f"{name}.png  {img.width}x{img.height}")
+    for src, name in SPRITES:
+        frames = load_frames(SRC / src)
+        w, h = frames[0].size
+        strip = Image.new("RGBA", (w * len(frames), h))
+        for i, f in enumerate(frames):
+            strip.paste(f, (i * w, 0))
+        strip.save(RES / "drawable-nodpi" / f"{name}_frames.png", optimize=True)
+        sprites.append((frames[0], color_paths(frames[0])))
+        print(f"{name}_frames.png  {len(frames)} quadros de {w}x{h}")
 
     groups, targets = [], []
     rep = 'android:repeatCount="infinite" android:repeatMode="restart"'

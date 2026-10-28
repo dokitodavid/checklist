@@ -1,0 +1,11 @@
+BRASAS JÁ ANIMADAS — loop de cintilação, sem deslocamento da partícula.
+
+Cada variação tem:
+- APNG: animação PNG com transparência.
+- GIF: animação com transparência, pronta para visualizar.
+- Spritesheet PNG: 24 quadros, 8 colunas por 3 linhas, leitura por linha.
+
+Quadro: 256 x 256 px. Tempo: 80 ms por quadro (loop de 1,92 s).
+O núcleo cintila e a ponta varia localmente; a trajetória fica por sua conta.
+Use APNG ou spritesheet no app; não carregue o APNG como PNG estático.
+Preserve pixels com nearest-neighbor / FilterQuality.None.
