@@ -54,19 +54,19 @@ def load_frames(path):
 # Partículas do widget: (sprite, x central em dp, dp por pixel da arte, inclinação, giro,
 # defasagem na subida, defasagem na cintilação). Área de desenho: W×H dp a partir do canto.
 WIDGET = [
-    # Cada pixel da arte com ~0,4 dp
-    (0, 24, 0.40, -4, 6, 0.00, 0),
-    (2, 68, 0.38, 8, 8, 0.55, 9),
-    (1, 110, 0.42, 0, 6, 0.22, 17),
-    (3, 152, 0.38, -6, 8, 0.78, 5),
-    (4, 196, 0.36, 10, 10, 0.36, 23),
-    (0, 238, 0.34, 4, 6, 0.66, 13),
+    # Cada pixel da arte com 0,22–0,28 dp (brasas de ~14–18 dp de altura)
+    (0, 24, 0.28, -4, 6, 0.00, 0),
+    (2, 68, 0.26, 8, 8, 0.55, 9),
+    (1, 110, 0.26, 0, 6, 0.22, 17),
+    (3, 152, 0.26, -6, 8, 0.78, 5),
+    (4, 196, 0.24, 10, 10, 0.36, 23),
+    (0, 238, 0.22, 4, 6, 0.66, 13),
 ]
 W, H = 260, 170
 FRAME_MS = 1000 // ATLAS["fps"] * WIDGET_STEP           # 40 ms
 FLAME_FRAMES = ATLAS["frames"] // WIDGET_STEP           # 32 quadros de chama no widget
 LOOP_FRAMES = 4 * FLAME_FRAMES                           # 128 quadros = 5,12 s por subida
-MAX_ALPHA = 0.75
+MAX_ALPHA = 0.6
 
 
 def alpha_at(p):
