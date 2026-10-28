@@ -282,7 +282,8 @@ fun TodoScreen(
             )
         },
         bottomBar = {
-            Surface(color = MaterialTheme.colorScheme.background) {
+            // Sem faixa de fundo: o papel de parede aparece atrás; só a cápsula do campo é sólida
+            Surface(color = Color.Transparent) {
                 Surface(
                     modifier = Modifier.navigationBarsPadding().imePadding().padding(horizontal = 16.dp, vertical = 12.dp),
                     shape = RoundedCornerShape(28.dp), color = MaterialTheme.colorScheme.surfaceContainerHighest,
