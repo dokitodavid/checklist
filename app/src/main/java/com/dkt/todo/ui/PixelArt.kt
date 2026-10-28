@@ -61,7 +61,7 @@ fun CompanionEmblem(modifier: Modifier = Modifier) {
 
 /** A arte usa o relógio Compose: respeita a escala de animação e o ciclo de vida. */
 @Composable
-fun AshenCompanion(modifier: Modifier = Modifier, animated: Boolean = true) {
+fun AshenCompanion(modifier: Modifier = Modifier, animated: Boolean = true, alpha: Float = 1f) {
     val transition = if (animated) rememberInfiniteTransition(label = "Mago assassino") else null
     val breath = transition?.animateFloat(
         initialValue = -1f, targetValue = 1f,
@@ -74,6 +74,7 @@ fun AshenCompanion(modifier: Modifier = Modifier, animated: Boolean = true) {
             contentDescription = "Mago assassino de capuz com adaga e uma brasa mágica",
             modifier = Modifier.fillMaxSize().graphicsLayer {
                 translationY = (breath?.value ?: 0f) * 1.dp.toPx()
+                this.alpha = alpha
             },
             contentScale = ContentScale.Fit,
             filterQuality = FilterQuality.None,

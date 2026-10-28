@@ -23,11 +23,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -40,6 +40,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -73,9 +74,12 @@ private val CellSize = 14.dp
 private val CellGap = 3.dp
 private val LabelWidth = 28.dp
 
-/** Medidor no estilo do GitHub: um quadrado por dia, mais forte quanto mais atividade. */
+/**
+ * Tela inicial: o mago em destaque, atalhos para as listas (Todas/Pendentes/Feitas)
+ * e o medidor no estilo do GitHub, com um quadrado por dia.
+ */
 @Composable
-fun ActivityScreen(store: TaskStore, onBack: () -> Unit) {
+fun ActivityScreen(store: TaskStore, onOpenList: (Filter) -> Unit, onAddTask: () -> Unit) {
     val changes = remember { store.changes() }
     val tasks by changes.collectAsState(initial = store.load())
     val activity = remember(tasks) { store.activity() }
@@ -83,17 +87,18 @@ fun ActivityScreen(store: TaskStore, onBack: () -> Unit) {
     var selected by remember { mutableStateOf<LocalDate?>(null) }
     val today = LocalDate.now()
     val pending = tasks.count { !it.done }
+    val done = tasks.count { it.done }
 
     Scaffold(
         topBar = {
             ScreenHeader(
-                title = "Atividade",
-                subtitle = "Tarefas criadas e feitas",
-                navigation = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
-                    }
+                title = "Checklist",
+                subtitle = when (pending) {
+                    0 -> if (tasks.isEmpty()) "Nenhuma tarefa" else "Tudo em dia"
+                    1 -> "1 pendente"
+                    else -> "$pending pendentes"
                 },
+                showCompanion = false,
             )
         },
     ) { padding ->
@@ -105,6 +110,35 @@ fun ActivityScreen(store: TaskStore, onBack: () -> Unit) {
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            // Mago em destaque, com o brilho da brasa atrás
+            Box(Modifier.fillMaxWidth().height(300.dp), contentAlignment = Alignment.Center) {
+                Box(
+                    Modifier
+                        .size(280.dp)
+                        .background(
+                            Brush.radialGradient(listOf(AshenColors.Ember.copy(alpha = 0.18f), Color.Transparent)),
+                            CircleShape,
+                        )
+                )
+                AshenCompanion(Modifier.size(196.dp, 294.dp))
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ListShortcut("Todas", tasks.size, Modifier.weight(1f)) { onOpenList(Filter.ALL) }
+                ListShortcut("Pendentes", pending, Modifier.weight(1f)) { onOpenList(Filter.PENDING) }
+                ListShortcut("Feitas", done, Modifier.weight(1f)) { onOpenList(Filter.DONE) }
+            }
+
+            Button(
+                onClick = onAddTask,
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                shape = CircleShape,
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Nova tarefa")
+            }
+
             Row(
                 Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -154,10 +188,25 @@ fun ActivityScreen(store: TaskStore, onBack: () -> Unit) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 val streak = streak(activity, today)
                 Stat("Sequência", streak.toString(), if (streak == 1) "dia concluindo" else "dias concluindo", Modifier.weight(1f))
-                Stat("Pendentes", pending.toString(), "agora", Modifier.weight(1f))
+                Stat("Hoje", (activity[today]?.done ?: 0).toString(), "feitas", Modifier.weight(1f))
             }
             Spacer(Modifier.height(8.dp))
         }
+    }
+}
+
+/** Atalho para uma das listas, com a quantidade de tarefas. */
+@Composable
+private fun ListShortcut(label: String, count: Int, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Column(
+        modifier
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest, RoundedCornerShape(16.dp))
+            .clickable(onClickLabel = "Abrir $label", onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(count.toString(), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurface)
+        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

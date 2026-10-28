@@ -23,7 +23,7 @@ Kotlin · Jetpack Compose · Material 3
 | **Filtrar** | Chips no topo: *Todas* · *Pendentes* · *Feitas*. |
 | **Limpar concluídas** | Menu ⋮ → remove todas as feitas de uma vez (também dá pra desfazer). |
 | **Contador** | Abaixo do título: “3 pendentes”, “1 pendente” ou “Tudo em dia”. |
-| **Atividade** | Menu ⋮ → quadro no estilo do GitHub com um quadrado por dia: *Uso*, *Criadas* ou *Feitas*, mais totais do ano e sequência de dias concluindo. |
+| **Atividade** | Tela inicial: o mago em destaque, atalhos *Todas* · *Pendentes* · *Feitas* (com contagem) que abrem a lista filtrada, botão **Nova tarefa** e quadro no estilo do GitHub com um quadrado por dia (*Uso*, *Criadas* ou *Feitas*), totais do ano e sequência. |
 
 **Ordem da lista:** pendentes primeiro → importantes no topo → mais recentes antes.
 
@@ -39,7 +39,7 @@ Kotlin · Jetpack Compose · Material 3
 
 - Interface **clean**, neutra, com controles arredondados e campo em cápsula.
 - Lista sem cartões; ações de tarefa reunidas no menu ⋮.
-- Mago assassino original em pixel art no cabeçalho de todas as telas, no estado vazio e no ícone.
+- Mago assassino original em pixel art: em destaque na Atividade, grande e translúcido ao fundo das listas, no widget e no ícone.
 - Brasas pixeladas atravessam a tela devagar, também no widget, com movimento contínuo.
 - Mago no cabeçalho do widget.
 - Tema escuro fixo, sem verde, com widget na mesma paleta.

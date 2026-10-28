@@ -34,6 +34,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -87,9 +88,14 @@ enum class Filter(val label: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TodoScreen(store: TaskStore, focusTick: Int = 0, onOpenActivity: () -> Unit = {}) {
+fun TodoScreen(
+    store: TaskStore,
+    filter: Filter,
+    onFilterChange: (Filter) -> Unit,
+    focusTick: Int = 0,
+    onBack: () -> Unit = {},
+) {
     var tasks by remember { mutableStateOf(store.load()) }
-    var filter by rememberSaveable { mutableStateOf(Filter.ALL) }
     var input by rememberSaveable { mutableStateOf("") }
     var menuOpen by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<Task?>(null) }
@@ -187,21 +193,18 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0, onOpenActivity: () -> Unit 
             ScreenHeader(
                 title = "Checklist",
                 subtitle = subtitle,
-                // Com a lista vazia o mago aparece grande no meio da tela
-                showCompanion = visible.isNotEmpty(),
+                showCompanion = false,
+                navigation = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar para a atividade")
+                    }
+                },
                 actions = {
                     Box {
                         IconButton(onClick = { menuOpen = true }) {
                             Icon(Icons.Filled.MoreVert, contentDescription = "Mais opções")
                         }
                         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                            DropdownMenuItem(
-                                text = { Text("Atividade") },
-                                onClick = {
-                                    menuOpen = false
-                                    onOpenActivity()
-                                },
-                            )
                             DropdownMenuItem(
                                 text = { Text("Limpar concluídas") },
                                 enabled = tasks.any { it.done },
@@ -245,11 +248,13 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0, onOpenActivity: () -> Unit 
         },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-        ) {
+        Box(Modifier.padding(padding).fillMaxSize()) {
+        // Mago grande ao fundo, mais transparente para não atrapalhar a leitura
+        AshenCompanion(
+            Modifier.align(Alignment.Center).size(220.dp, 330.dp),
+            alpha = 0.22f,
+        )
+        Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -264,7 +269,7 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0, onOpenActivity: () -> Unit 
                             selectedLabelColor = MaterialTheme.colorScheme.onSurface,
                             labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         ),
-                        onClick = { filter = f },
+                        onClick = { onFilterChange(f) },
                         label = { Text(f.label) },
                     )
                 }
@@ -276,8 +281,6 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0, onOpenActivity: () -> Unit 
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    AshenCompanion(Modifier.size(150.dp, 225.dp))
-                    Spacer(Modifier.height(16.dp))
                     Text(
                         when (filter) {
                             Filter.ALL -> "Sua lista começa aqui"
@@ -327,6 +330,7 @@ fun TodoScreen(store: TaskStore, focusTick: Int = 0, onOpenActivity: () -> Unit 
                     }
                 }
             }
+        }
         }
     }
 

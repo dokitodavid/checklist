@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
@@ -13,26 +14,47 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.dkt.todo.data.TaskStore
 
-enum class Screen { LIST, ACTIVITY }
+enum class Screen { ACTIVITY, LIST }
 
-/** Troca entre a lista e a atividade, mantendo o estado de cada tela (texto digitado, filtro). */
+/**
+ * O app abre na Atividade; os botões Todas/Pendentes/Feitas de lá abrem a lista
+ * já filtrada, e o voltar retorna para a Atividade.
+ */
 @Composable
 fun ChecklistApp(store: TaskStore, focusTick: Int) {
-    var screen by rememberSaveable { mutableStateOf(Screen.LIST) }
+    var screen by rememberSaveable { mutableStateOf(Screen.ACTIVITY) }
+    var filter by rememberSaveable { mutableStateOf(Filter.ALL) }
+    // Cada pedido de "nova tarefa" (widget ou Atividade) abre a lista com o teclado
+    var focusRequests by rememberSaveable { mutableIntStateOf(0) }
     val states = rememberSaveableStateHolder()
 
-    // O "+" do widget sempre leva para a lista
+    fun openList(f: Filter, focus: Boolean = false) {
+        filter = f
+        screen = Screen.LIST
+        if (focus) focusRequests++
+    }
+
     LaunchedEffect(focusTick) {
-        if (focusTick > 0) screen = Screen.LIST
+        if (focusTick > 0) openList(Filter.ALL, focus = true)
     }
 
     Box(Modifier.fillMaxSize()) {
         states.SaveableStateProvider(screen.name) {
             when (screen) {
-                Screen.LIST -> TodoScreen(store, focusTick, onOpenActivity = { screen = Screen.ACTIVITY })
-                Screen.ACTIVITY -> {
-                    BackHandler { screen = Screen.LIST }
-                    ActivityScreen(store, onBack = { screen = Screen.LIST })
+                Screen.ACTIVITY -> ActivityScreen(
+                    store,
+                    onOpenList = { openList(it) },
+                    onAddTask = { openList(Filter.ALL, focus = true) },
+                )
+                Screen.LIST -> {
+                    BackHandler { screen = Screen.ACTIVITY }
+                    TodoScreen(
+                        store,
+                        filter = filter,
+                        onFilterChange = { filter = it },
+                        focusTick = focusRequests,
+                        onBack = { screen = Screen.ACTIVITY },
+                    )
                 }
             }
         }
