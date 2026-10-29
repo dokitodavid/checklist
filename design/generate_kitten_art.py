@@ -14,7 +14,10 @@ def rect(shapes, color, x, y, w, h):
     shapes.append((color, x, y, w, h))
 
 
-def export(name, size, shapes):
+def export(name, size, shapes, alpha=None):
+    # alpha < 1 deixa o desenho todo translúcido (usado no fundo do widget)
+    alpha_attr = f' android:alpha="{alpha}"' if alpha is not None else ''
+    opacity_attr = f' opacity="{alpha}"' if alpha is not None else ''
     paths = '\n'.join(
         f'    <path android:fillColor="{c}" android:pathData="M{x},{y}h{w}v{h}h-{w}z" />'
         for c, x, y, w, h in shapes
@@ -22,12 +25,12 @@ def export(name, size, shapes):
     (DRAWABLE / f'{name}.xml').write_text(
         f'<vector xmlns:android="http://schemas.android.com/apk/res/android" '
         f'android:width="{size}dp" android:height="{size}dp" '
-        f'android:viewportWidth="{size}" android:viewportHeight="{size}">\n{paths}\n</vector>\n', encoding='utf-8')
+        f'android:viewportWidth="{size}" android:viewportHeight="{size}"{alpha_attr}>\n{paths}\n</vector>\n', encoding='utf-8')
     rects = ''.join(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="{c}"/>'
                     for c, x, y, w, h in shapes)
     (DESIGN / f'{name}.svg').write_text(
         f'<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480" '
-        f'viewBox="0 0 {size} {size}" shape-rendering="crispEdges" role="img" '
+        f'viewBox="0 0 {size} {size}" shape-rendering="crispEdges"{opacity_attr} role="img" '
         f'aria-label="Pixel art original do tema Gatinho">{rects}</svg>\n', encoding='utf-8')
 
 
@@ -105,6 +108,7 @@ for c, x, y, w, h in garden[1:]:
     rgb = tuple(int(c[i:i+2], 16) for i in (1, 3, 5))
     faded = '#' + ''.join(f'{round(a * .12 + b * .88):02X}' for a, b in zip(rgb, base))
     widget.append((faded, x, y, w, h))
-export('kitten_widget_bg', 96, widget)
+# Widget um pouco transparente: a tela inicial aparece de leve por trás
+export('kitten_widget_bg', 96, widget, alpha=0.85)
 
 print('Pixel art: gatinho, jardim e fundo do widget gerados em SVG e VectorDrawable.')

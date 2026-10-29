@@ -85,6 +85,8 @@ object Reminders {
             .setContentIntent(open)
             .setAutoCancel(true)
             .setCategory(Notification.CATEGORY_REMINDER)
+            // Mostra o título na tela de bloqueio; o botão Concluir funciona sem desbloquear
+            .setVisibility(Notification.VISIBILITY_PUBLIC)
             .addAction(Notification.Action.Builder(null, "Concluir", complete).build())
             .build()
         manager.notify(requestCode(task.id), notification)

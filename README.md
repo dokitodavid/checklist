@@ -115,6 +115,9 @@ A tela inicial reúne o companheiro escolhido, atalhos com contagem de tarefas,
 - **+** abre a lista com o teclado pronto para uma nova tarefa.
 - Tocar no quadro abre o app.
 - Redimensionável, com tamanho inicial **3 × 2**.
+- Fundo um pouco transparente (85%): a tela inicial aparece de leve por trás.
+- Também pode ficar na **tela de bloqueio**, nos aparelhos em que o Android permite
+  widgets ali (ao editar a tela de bloqueio, procure *Checklist* na lista de widgets).
 - Atualiza com as tarefas e acompanha o tema escolhido em Configurações.
 
 </details>
@@ -123,7 +126,8 @@ A tela inicial reúne o companheiro escolhido, atalhos com contagem de tarefas,
 <summary><strong>🔔 Lembretes, dados e privacidade</strong></summary>
 
 Na primeira vez, o Android pede permissão para notificações. Um lembrete permite
-concluir a tarefa direto pela notificação. Alarmes são reagendados após reiniciar
+concluir a tarefa direto pela notificação, inclusive na tela de bloqueio, onde o
+título da tarefa aparece e o botão **Concluir** funciona sem desbloquear. Alarmes são reagendados após reiniciar
 o celular ou atualizar o aplicativo; o horário pode variar conforme as permissões
 e a economia de bateria do Android.
 
