@@ -115,7 +115,6 @@ A tela inicial reúne o companheiro escolhido, atalhos com contagem de tarefas,
 - **+** abre a lista com o teclado pronto para uma nova tarefa.
 - Tocar no quadro abre o app.
 - Redimensionável, com tamanho inicial **3 × 2**.
-- Fundo um pouco transparente (85%): a tela inicial aparece de leve por trás.
 - Também pode ficar na **tela de bloqueio**, nos aparelhos em que o Android permite
   widgets ali (ao editar a tela de bloqueio, procure *Checklist* na lista de widgets).
 - Atualiza com as tarefas e acompanha o tema escolhido em Configurações.

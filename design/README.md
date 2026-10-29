@@ -38,8 +38,7 @@ Os cenários em `drawable-nodpi/` continuam os originais:
 
 - `ruins_hero.webp`: Atividade, Crop/TopCenter, 65% de opacidade, fades nas bordas.
 - `ruins_tabs.webp`: papel de parede fixo nas listas, com 30% de opacidade.
-- `ruins_widget_bg.webp`: fundo já esmaecido para o widget, sem personagem, com 85% de
-  opacidade (a tela inicial aparece de leve por trás; textos e botões ficam opacos).
+- `ruins_widget_bg.webp`: fundo já esmaecido para o widget, sem personagem.
 
 O mago tem largura de 196 dp e deslocamento de 15% à esquerda para compensar a capa
 assimétrica. A composição da tela inicial mantém o cenário de 300 dp e agora inclui
@@ -70,8 +69,7 @@ em 12%, preservando a leitura. O widget recebe uma versão já esmaecida do jard
 
 - `kitten_companion`: grade de 48 × 48.
 - `kitten_garden`: grade de 96 × 96.
-- `kitten_widget_bg`: cenário com as cores misturadas a 12% sobre o fundo creme, com 85% de
-  opacidade (`android:alpha`), como o fundo do widget do Mago.
+- `kitten_widget_bg`: cenário com as cores misturadas a 12% sobre o fundo creme.
 
 O mesmo comando gera os SVGs desta pasta e os VectorDrawables de `res/drawable/`:
 

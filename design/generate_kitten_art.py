@@ -108,7 +108,6 @@ for c, x, y, w, h in garden[1:]:
     rgb = tuple(int(c[i:i+2], 16) for i in (1, 3, 5))
     faded = '#' + ''.join(f'{round(a * .12 + b * .88):02X}' for a, b in zip(rgb, base))
     widget.append((faded, x, y, w, h))
-# Widget um pouco transparente: a tela inicial aparece de leve por trás
-export('kitten_widget_bg', 96, widget, alpha=0.85)
+export('kitten_widget_bg', 96, widget)
 
 print('Pixel art: gatinho, jardim e fundo do widget gerados em SVG e VectorDrawable.')

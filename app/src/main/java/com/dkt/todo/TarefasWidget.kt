@@ -102,9 +102,8 @@ private fun WidgetContent(tasks: List<Task>, activity: Map<LocalDate, DayActivit
     val heatmap = remember(activity, today, appearance) { heatmapBitmap(activity, today, WIDGET_WEEKS, appearance) }
     val openApp = actionStartActivity<MainActivity>()
 
-    // Sem cor sólida atrás: o fundo é a própria imagem do cenário, com 85% de opacidade, para a
-    // tela inicial aparecer de leve. Textos e botões continuam com opacidade total.
-    Box(GlanceModifier.fillMaxSize().appWidgetBackground().cornerRadius(20.dp)) {
+    Box(GlanceModifier.fillMaxSize().appWidgetBackground().background(ColorProvider(palette.Night)).cornerRadius(20.dp)) {
+        // O cenário já é esmaecido; textos e botões mantêm opacidade total.
         Image(
             provider = ImageProvider(if (appearance == AppAppearance.KITTEN) R.drawable.kitten_widget_bg else R.drawable.ruins_widget_bg),
             contentDescription = null,
