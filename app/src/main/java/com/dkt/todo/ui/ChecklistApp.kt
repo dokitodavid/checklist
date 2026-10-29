@@ -17,16 +17,18 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.dkt.todo.data.TaskStore
+import com.dkt.todo.data.AppAppearance
 
-enum class Screen { ACTIVITY, LIST }
+enum class Screen { ACTIVITY, LIST, SETTINGS }
 
 /**
  * O app abre na Atividade; os botões Todas/Pendentes/Feitas de lá abrem a lista
  * já filtrada, e o voltar retorna para a Atividade.
  */
 @Composable
-fun ChecklistApp(store: TaskStore, focusTick: Int) {
+fun ChecklistApp(store: TaskStore, focusTick: Int, onAppearanceChange: (AppAppearance) -> Unit) {
     var screen by rememberSaveable { mutableStateOf(Screen.ACTIVITY) }
+    var settingsReturn by rememberSaveable { mutableStateOf(Screen.ACTIVITY) }
     var filter by rememberSaveable { mutableStateOf(Filter.ALL) }
     // Cada pedido de "nova tarefa" (widget ou Atividade) abre a lista com o teclado
     var focusRequests by rememberSaveable { mutableIntStateOf(0) }
@@ -41,6 +43,11 @@ fun ChecklistApp(store: TaskStore, focusTick: Int) {
         if (focus) focusRequests++
     }
 
+    fun openSettings() {
+        settingsReturn = screen
+        screen = Screen.SETTINGS
+    }
+
     LaunchedEffect(focusTick) {
         if (focusTick > 0) openList(Filter.ALL, focus = true)
     }
@@ -52,6 +59,7 @@ fun ChecklistApp(store: TaskStore, focusTick: Int) {
                     store,
                     onOpenList = { openList(it) },
                     onAddTask = { openList(Filter.ALL, focus = true) },
+                    onOpenSettings = { openSettings() },
                 )
                 Screen.LIST -> {
                     BackHandler { screen = Screen.ACTIVITY }
@@ -61,9 +69,17 @@ fun ChecklistApp(store: TaskStore, focusTick: Int) {
                         onFilterChange = { filter = it },
                         focusTick = focusRequests,
                         onBack = { screen = Screen.ACTIVITY },
+                        onOpenSettings = { openSettings() },
                         onTaskCompleted = { origin ->
                             completion = TaskCompletionEvent((completion?.id ?: 0) + 1, origin)
                         },
+                    )
+                }
+                Screen.SETTINGS -> {
+                    BackHandler { screen = settingsReturn }
+                    SettingsScreen(
+                        onBack = { screen = settingsReturn },
+                        onAppearanceChange = onAppearanceChange,
                     )
                 }
             }

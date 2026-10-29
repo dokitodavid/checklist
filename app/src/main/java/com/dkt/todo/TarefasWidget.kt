@@ -47,11 +47,13 @@ import androidx.glance.unit.ColorProvider
 import com.dkt.todo.data.DayActivity
 import com.dkt.todo.data.Task
 import com.dkt.todo.data.TaskStore
-import com.dkt.todo.ui.HeatColors
+import com.dkt.todo.ui.heatColors
 import com.dkt.todo.ui.Metric
 import com.dkt.todo.ui.heatLevel
 import com.dkt.todo.ui.streak
-import com.dkt.todo.ui.theme.AshenColors
+import com.dkt.todo.ui.theme.paletteFor
+import com.dkt.todo.data.AppAppearance
+import com.dkt.todo.data.AppearanceStore
 import java.time.LocalDate
 
 /** Parâmetro do botão "+": abre o app já com o teclado no campo de nova tarefa. */
@@ -64,13 +66,16 @@ class TarefasWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val store = TaskStore(context)
+        val appearances = AppearanceStore(context)
         provideContent {
             // Recompõe sozinho sempre que as tarefas mudam no app
             val flow = remember { store.changes() }
             val tasks by flow.collectAsState(initial = store.load())
+            val appearanceFlow = remember { appearances.changes() }
+            val appearance by appearanceFlow.collectAsState(initial = appearances.load())
             val activity = remember(tasks) { store.activity() }
             GlanceTheme {
-                WidgetContent(tasks, activity)
+                WidgetContent(tasks, activity, appearance)
             }
         }
     }
@@ -86,21 +91,21 @@ class TarefasWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = TarefasWidget()
 }
 
-/** Quadro de atividade (estilo GitHub) com o cenário de ruínas ao fundo, sem personagem. */
+/** Quadro de atividade com o cenário e as cores da aparência salva, sem personagem. */
 @Composable
-private fun WidgetContent(tasks: List<Task>, activity: Map<LocalDate, DayActivity>) {
+private fun WidgetContent(tasks: List<Task>, activity: Map<LocalDate, DayActivity>, appearance: AppAppearance) {
+    val palette = paletteFor(appearance)
     val today = LocalDate.now()
     val pending = tasks.count { !it.done }
     val doneToday = activity[today]?.done ?: 0
     val streak = streak(activity, today)
-    val heatmap = remember(activity, today) { heatmapBitmap(activity, today, WIDGET_WEEKS) }
+    val heatmap = remember(activity, today, appearance) { heatmapBitmap(activity, today, WIDGET_WEEKS, appearance) }
     val openApp = actionStartActivity<MainActivity>()
 
-    Box(GlanceModifier.fillMaxSize().appWidgetBackground().background(ColorProvider(AshenColors.Night)).cornerRadius(20.dp)) {
-        // Cenário de fundo, já esmaecido na própria imagem (25% sobre o cinza do widget), para
-        // não apagar textos e botões com transparência no widget inteiro
+    Box(GlanceModifier.fillMaxSize().appWidgetBackground().background(ColorProvider(palette.Night)).cornerRadius(20.dp)) {
+        // O cenário já é esmaecido; textos e botões mantêm opacidade total.
         Image(
-            provider = ImageProvider(R.drawable.ruins_widget_bg),
+            provider = ImageProvider(if (appearance == AppAppearance.KITTEN) R.drawable.kitten_widget_bg else R.drawable.ruins_widget_bg),
             contentDescription = null,
             modifier = GlanceModifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
@@ -112,8 +117,8 @@ private fun WidgetContent(tasks: List<Task>, activity: Map<LocalDate, DayActivit
             ) {
                 Column(modifier = GlanceModifier.defaultWeight().clickable(openApp)) {
                     Text(
-                        text = "Checklist",
-                        style = TextStyle(fontWeight = FontWeight.Medium, fontSize = 17.sp, color = ColorProvider(AshenColors.Parchment)),
+                        text = if (appearance == AppAppearance.KITTEN) "Checklist Gatinho" else "Checklist",
+                        style = TextStyle(fontWeight = FontWeight.Medium, fontSize = 17.sp, color = ColorProvider(palette.Parchment)),
                     )
                     Text(
                         text = when (pending) {
@@ -121,7 +126,7 @@ private fun WidgetContent(tasks: List<Task>, activity: Map<LocalDate, DayActivit
                             1 -> "1 pendente"
                             else -> "$pending pendentes"
                         },
-                        style = TextStyle(fontSize = 12.sp, color = ColorProvider(AshenColors.Muted)),
+                        style = TextStyle(fontSize = 12.sp, color = ColorProvider(palette.Muted)),
                     )
                 }
                 Spacer(GlanceModifier.width(8.dp))
@@ -129,14 +134,14 @@ private fun WidgetContent(tasks: List<Task>, activity: Map<LocalDate, DayActivit
                     modifier = GlanceModifier
                         .size(36.dp)
                         .cornerRadius(18.dp)
-                        .background(ColorProvider(AshenColors.Raised))
+                        .background(ColorProvider(palette.Raised))
                         .clickable(actionStartActivity<MainActivity>(actionParametersOf(FocusInputKey to true))),
                     contentAlignment = Alignment.Center,
                 ) {
                     Image(
                         provider = ImageProvider(R.drawable.ic_add),
                         contentDescription = "Adicionar tarefa",
-                        colorFilter = ColorFilter.tint(ColorProvider(AshenColors.Muted)),
+                        colorFilter = ColorFilter.tint(ColorProvider(palette.Muted)),
                         modifier = GlanceModifier.size(20.dp),
                     )
                 }
@@ -151,7 +156,7 @@ private fun WidgetContent(tasks: List<Task>, activity: Map<LocalDate, DayActivit
             Text(
                 text = "$doneToday feita(s) hoje · sequência de $streak dia(s)",
                 modifier = GlanceModifier.padding(start = 4.dp),
-                style = TextStyle(fontSize = 12.sp, color = ColorProvider(AshenColors.Muted)),
+                style = TextStyle(fontSize = 12.sp, color = ColorProvider(palette.Muted)),
             )
         }
     }
@@ -161,7 +166,9 @@ private fun WidgetContent(tasks: List<Task>, activity: Map<LocalDate, DayActivit
  * Desenha o quadro como imagem: widgets não aceitam muitos elementos, e um bitmap mostra
  * quantas semanas quiser. Colunas de domingo a sábado; a última é a semana de hoje.
  */
-private fun heatmapBitmap(activity: Map<LocalDate, DayActivity>, today: LocalDate, weeks: Int): Bitmap {
+private fun heatmapBitmap(activity: Map<LocalDate, DayActivity>, today: LocalDate, weeks: Int, appearance: AppAppearance): Bitmap {
+    val palette = paletteFor(appearance)
+    val colors = heatColors(palette)
     val cell = 30f
     val gap = 8f
     val step = cell + gap
@@ -171,7 +178,7 @@ private fun heatmapBitmap(activity: Map<LocalDate, DayActivity>, today: LocalDat
     val outline = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = 3f
-        color = AshenColors.Parchment.copy(alpha = 0.7f).toArgb()
+        color = palette.Parchment.copy(alpha = 0.7f).toArgb()
     }
     val lastSunday = today.minusDays((today.dayOfWeek.value % 7).toLong())
     val firstDay = lastSunday.minusWeeks((weeks - 1).toLong())
@@ -182,7 +189,7 @@ private fun heatmapBitmap(activity: Map<LocalDate, DayActivity>, today: LocalDat
             if (day.isAfter(today)) continue
             val x = w * step
             val y = d * step
-            fill.color = HeatColors[heatLevel(Metric.USE.of(activity[day]), max)].toArgb()
+            fill.color = colors[heatLevel(Metric.USE.of(activity[day]), max)].toArgb()
             canvas.drawRoundRect(x, y, x + cell, y + cell, 7f, 7f, fill)
             if (day == today) canvas.drawRoundRect(x + 1.5f, y + 1.5f, x + cell - 1.5f, y + cell - 1.5f, 7f, 7f, outline)
         }

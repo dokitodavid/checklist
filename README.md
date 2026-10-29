@@ -1,136 +1,222 @@
+<a name="inicio"></a>
 <div align="center">
 
 # ✓ Checklist
 
-Lista de tarefas simples e direta para Android.<br>
-Kotlin · Jetpack Compose · Material 3
+### Seu dia, no seu ritmo. Agora com duas companhias.
+
+Um app Android de tarefas com pixel art, histórico de atividade e widget.<br>
+Escolha o **Mago** ou o **Gatinho** nas configurações — suas tarefas continuam com você.
+
+[![Build APK](https://github.com/dokitodavid/checklist/actions/workflows/build.yml/badge.svg)](https://github.com/dokitodavid/checklist/actions/workflows/build.yml)
+![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-9C4566?logo=android&logoColor=white)
+![Kotlin](https://img.shields.io/badge/Kotlin-Jetpack_Compose-795666?logo=kotlin&logoColor=white)
+![Offline](https://img.shields.io/badge/100%25-offline-566B57)
+
+[**Baixar APK ↓**](https://github.com/dokitodavid/checklist/releases/latest) · [Escolher um tema](#temas) · [Como usar](#como-usar) · [Compilar](#desenvolver)
 
 </div>
 
 ---
 
-## Funcionalidades
+<a name="temas"></a>
 
-### No app
+## ✨ Duas aparências, um Checklist
 
-| | |
+<table>
+<tr>
+<th align="center" width="50%">🌙 Mago</th>
+<th align="center" width="50%">🌸 Gatinho</th>
+</tr>
+<tr>
+<td align="center"><img src="design/companion.png" height="280" alt="Mago de capuz com adaga e brasa em pixel art"></td>
+<td align="center"><img src="design/kitten_companion.svg" height="280" alt="Gatinho creme com cachecol rosa e coração em pixel art"></td>
+</tr>
+<tr>
+<td align="center">Ruínas, cinza escuro e atividade em âmbar.<br>A companhia misteriosa da versão original.</td>
+<td align="center">Jardim, fundo creme e detalhes rosa.<br>Um gatinho para acompanhar cada pequena conquista.</td>
+</tr>
+</table>
+
+<p align="center"><sub>Artes reais incluídas no projeto; as imagens acima não são capturas de tela.</sub></p>
+
+**Para trocar:** na tela inicial, toque em **⚙ Configurações → Aparência → Mago ou Gatinho**.
+Na lista, o mesmo caminho fica em **⋮ → Configurações**.
+
+A mudança aparece na hora e fica salva ao fechar o app. Cenário, personagem, cores,
+efeito de conclusão e widget acompanham a escolha. É **um único APK**: tarefas,
+lembretes e histórico são os mesmos nos dois temas. O Mago continua sendo o padrão
+nas instalações existentes; o ícone do launcher continua o original.
+
+<details>
+<summary><strong>🌙 Explorar a aparência Mago</strong></summary>
+
+- Tema escuro com superfícies neutras e controles arredondados.
+- Mago original de capuz, adaga e brasa, com respiração discreta.
+- Cenário de ruínas na Atividade e papel de parede discreto nas listas.
+- Quadro de atividade em âmbar e onda de pixels cinza ao concluir.
+
+<img src="app/src/main/res/drawable-nodpi/ruins_hero.webp" width="360" alt="Cenário de ruínas do tema Mago">
+
+</details>
+
+<details>
+<summary><strong>🌸 Explorar a aparência Gatinho</strong></summary>
+
+- Tema claro em creme, rosa e lavanda, com texto escuro.
+- Gatinho de olhos brilhantes, bochechas rosadas, cachecol e coração.
+- Jardim com janela, nuvens e flores em pixels inteiros.
+- Quadro de atividade e onda de conclusão em rosa; widget na mesma paleta.
+- Arte vetorial local, sem downloads e sem suavização entre os pixels.
+
+<img src="design/kitten_garden.svg" width="360" alt="Janela com céu pastel, nuvens e vasinhos de flores em pixel art">
+
+</details>
+
+<a name="como-usar"></a>
+
+## ☑ Do primeiro toque à tarefa feita
+
+| Você quer… | Faça assim |
 |---|---|
-| **Adicionar** | Digite no campo de baixo e toque em enviar (ou Enter). A tarefa nova entra no topo. |
-| **Concluir** | Toque no checkbox ou **arraste a tarefa para a direita**. Ela fica riscada e vai para o fim da lista. Arrastar para a direita uma feita reabre. |
-| **Excluir** | **Arraste para a esquerda** (ou menu ⋮ → Excluir), com **Desfazer** na barra de baixo por alguns segundos. |
-| **Reordenar** | **Segure e arraste** uma pendente para mudar a ordem. A ordem é sua: nada muda de lugar sozinho. |
-| **Data e lembrete** | No diálogo de edição: escolha o dia e, se quiser, o horário do lembrete (notificação com botão **Concluir**). A data aparece embaixo do título, em vermelho se estiver atrasada. |
-| **Organizar por data** | Ícone de calendário no topo da lista (aparece quando há tarefas com data): põe as pendentes em ordem de data, com Desfazer. |
-| **Importante** | Menu ⋮ da tarefa → Marcar importante (aparece uma estrela). |
-| **Editar** | Toque no texto da tarefa para abrir o diálogo de edição. |
-| **Filtrar** | Chips no topo: *Todas* · *Pendentes* · *Feitas*. |
-| **Limpar concluídas** | Menu ⋮ → remove todas as feitas de uma vez (também dá pra desfazer). |
-| **Contador** | Abaixo do título: “3 pendentes”, “1 pendente” ou “Tudo em dia”. |
-| **Atividade** | Tela inicial: o mago em destaque, atalhos *Todas* · *Pendentes* · *Feitas* (com contagem) que abrem a lista filtrada, botão **Nova tarefa** e quadro no estilo do GitHub com um quadrado por dia (*Uso*, *Criadas* ou *Feitas*), totais do ano e sequência. |
+| **Adicionar** | Toque em **Nova tarefa**, digite e envie. Na lista, use o campo de baixo ou Enter. A tarefa entra no topo. |
+| **Concluir ou reabrir** | Toque no **checkbox**. As feitas ficam riscadas, no fim da lista. |
+| **Excluir** | Abra o **⋮ da tarefa → Excluir**. Use **Desfazer** na barra inferior se precisar recuperar. |
+| **Reordenar** | **Segure e arraste** uma tarefa pendente para definir sua posição. |
+| **Editar** | Toque no texto da tarefa ou em **⋮ → Editar**. |
+| **Marcar importante** | Use **⋮ → Marcar importante**; uma estrela aparece na linha. |
+| **Escolher data e lembrete** | Abra a edição, escolha o dia e, se quiser, o horário. Datas atrasadas ficam em vermelho. |
+| **Organizar por data** | Toque no calendário do topo da lista. A ação pode ser desfeita. |
+| **Filtrar** | Use **Todas · Pendentes · Feitas** na Atividade ou na lista. |
+| **Limpar feitas** | No menu do topo, toque em **Limpar concluídas**; também dá para desfazer. |
+| **Trocar o visual** | Abra **Configurações → Aparência** e selecione um dos dois temas. |
 
-**Ordem da lista:** pendentes primeiro, na ordem que você definir; depois as concluídas.
+**Sem ações ao arrastar para os lados:** concluir e excluir usam os controles acima
+nos dois temas. O gesto de segurar e arrastar continua servindo para reordenar.
 
-**Lembretes:** na primeira vez o Android pede permissão para notificações. Os lembretes são
-reagendados sozinhos depois de reiniciar o celular ou atualizar o app.
+<details>
+<summary><strong>🗓 Ver como funciona a Atividade</strong></summary>
 
-### Widget da tela inicial
+A tela inicial reúne o companheiro escolhido, atalhos com contagem de tarefas,
+**Nova tarefa** e um quadro com um quadradinho por dia.
 
-- Quadro de atividade no estilo do GitHub (últimas 16 semanas, tarefas criadas + feitas),
-  com o dia de hoje contornado e o cenário de ruínas ao fundo.
-- Mostra quantas estão pendentes, quantas foram feitas hoje e a sequência de dias.
-- Botão **+** abre o app já com o teclado pronto para digitar; tocar no resto abre o app.
-- Atualiza sozinho quando algo muda no app (e vice-versa).
-- Redimensionável (padrão 3×2).
+- Alterne entre **Uso**, **Criadas** e **Feitas**.
+- Toque em um dia para consultar os detalhes.
+- Veja os totais do último ano, as feitas de hoje e a sequência de dias concluindo.
+- O histórico continua salvo mesmo quando as tarefas são excluídas.
 
-### Visual
+</details>
 
-- Interface **clean**, neutra, com controles arredondados e campo em cápsula.
-- Lista sem cartões; gestos para concluir, excluir e reordenar, e o resto no menu ⋮.
-- Mago assassino original em pixel art, em destaque na Atividade diante de um cenário de ruínas, e no ícone.
-- Listas com cenário vertical de ruínas discreto ao fundo; widget com o cenário, sem personagem.
-- Ao concluir uma tarefa, uma onda de quadradinhos cinza se espalha pela tela.
-- Tema escuro fixo, sem verde, com widget na mesma paleta.
-- Artes locais em alta resolução; ícone adaptativo e monocromático para Android 13+.
-- [Guia visual e limites de validação](design/README.md); [favicon PNG](design/favicon.png).
+<details>
+<summary><strong>🏠 Conhecer o widget</strong></summary>
 
-### Dados
+- Quadro das últimas **16 semanas**, com o dia atual contornado.
+- Contagem de pendentes, feitas hoje e sequência de dias.
+- **+** abre a lista com o teclado pronto para uma nova tarefa.
+- Tocar no quadro abre o app.
+- Redimensionável, com tamanho inicial **3 × 2**.
+- Atualiza com as tarefas e acompanha o tema escolhido em Configurações.
 
-- Tudo fica salvo **só no celular** (SharedPreferences, em JSON). Sem conta, sem internet.
-- O histórico da Atividade (criadas/feitas por dia) é guardado à parte e continua mesmo
-  se as tarefas forem excluídas.
-- O backup automático do Android (`allowBackup`) pode levar as tarefas para um celular novo.
+</details>
 
----
+<details>
+<summary><strong>🔔 Lembretes, dados e privacidade</strong></summary>
 
-## Instalar no celular
+Na primeira vez, o Android pede permissão para notificações. Um lembrete permite
+concluir a tarefa direto pela notificação. Alarmes são reagendados após reiniciar
+o celular ou atualizar o aplicativo; o horário pode variar conforme as permissões
+e a economia de bateria do Android.
 
-O APK é gerado pelo GitHub Actions — não precisa do Android Studio.
+Tarefas, histórico e preferência de aparência ficam **só no celular**, em
+SharedPreferences. Sem conta, servidor ou conexão de internet. O backup automático
+do Android pode restaurar esses dados em outro aparelho.
 
-1. Faça push (ou merge) na branch `main`.
-2. Aba **Actions** → espere o **Build APK** ficar verde (~3–5 min).
-3. Aba **Releases** → baixe o `Checklist.apk` pelo celular e instale
-   (o Android pede para permitir “fontes desconhecidas”).
+</details>
 
-Cada build com sucesso na `main` gera uma release nova (`1.0`, `1.1`, `1.2`, …);
-builds que falham não pulam número. Para começar a `2.0`, mude `VERSAO_PRINCIPAL`
-em `.github/workflows/build.yml`. Também dá pra rodar manualmente em
-**Actions → Build APK → Run workflow**.
+## 📲 Instalar no celular
 
-Para atualizar o app, baixe o APK da release nova e instale por cima.
+1. Abra a [release mais recente](https://github.com/dokitodavid/checklist/releases/latest).
+2. Baixe **Checklist.apk** no celular.
+3. Abra o arquivo e permita a instalação por essa fonte, se o Android solicitar.
+4. Explore a Atividade e escolha sua companhia em **⚙ Configurações**.
 
-**O que mudou:** cada release lista os títulos dos commits desde a anterior.
-Commits com `[skip ci]` na mensagem (mudanças só no README, no workflow etc.)
-não geram release e ficam fora da lista.
+Para atualizar, instale o novo APK por cima do anterior. O identificador do app e
+a chave de assinatura continuam os mesmos, preservando as tarefas.
 
-> O APK é sempre assinado com a mesma chave (`app/tarefas.keystore`), então a
-> versão nova instala **por cima** da antiga sem perder as tarefas.
-> A chave e a senha estão no repositório de propósito — é um app de uso pessoal.
-> Se um dia for publicar, troque por uma chave privada guardada em *secrets*.
+<details>
+<summary><strong>⚙ Como os APKs são publicados</strong></summary>
 
-### Pelo Android Studio
+Cada push ou merge na `main` executa o workflow [Build APK](https://github.com/dokitodavid/checklist/actions/workflows/build.yml):
+testes de preferência, compilação release e lint. Quando passa, publica `Checklist.apk`
+em uma nova release (`1.0`, `1.1`, `1.2`…). Também é possível executar em **Actions →
+Build APK → Run workflow**.
 
-Abra a pasta do projeto, espere o Gradle sincronizar e clique em **Run** com o
-celular conectado (depuração USB ativada).
+Builds que falham não pulam números. Para iniciar a série `2.0`, altere
+`VERSAO_PRINCIPAL` em `.github/workflows/build.yml`. As notas listam os commits desde
+a release anterior; commits com `[skip ci]` não geram release.
+
+A chave `app/tarefas.keystore` é a chave de uso pessoal já utilizada pelo projeto.
+Para distribuição pública, use uma chave privada e secrets próprios.
+
+</details>
+
+<a name="desenvolver"></a>
+
+## 🛠 Para quem desenvolve
+
+**Android 8.0+ (API 26)** · **JDK 17** · **Android SDK 35** · **Kotlin + Jetpack Compose + Material 3**
+
+Abra o projeto no Android Studio e execute no aparelho ou emulador. Pelo terminal:
 
 ```bash
-./gradlew assembleRelease   # APK em app/build/outputs/apk/release/
+./gradlew testDebugUnitTest assembleRelease lintRelease
+# Windows: .\gradlew.bat testDebugUnitTest assembleRelease lintRelease
+# APK: app/build/outputs/apk/release/app-release.apk
 ```
 
----
+<details>
+<summary><strong>🧩 Navegar pela estrutura do projeto</strong></summary>
 
-## Estrutura
-
-```
+```text
 app/src/main/java/com/dkt/todo/
-├── MainActivity.kt        # Activity; trata o atalho "+" do widget
-├── TarefasWidget.kt       # Widget (Glance): quadro de atividade, cenário e botão +
-├── Reminders.kt           # Lembretes: alarmes, notificação e reagendar ao reiniciar
+├── MainActivity.kt           # Preferência, barras do sistema e entrada do app
+├── TarefasWidget.kt          # Atividade na tela inicial, com o tema salvo
+├── Reminders.kt              # Alarmes, notificações e botão Concluir
 ├── data/
-│   ├── Task.kt            # Modelo da tarefa
-│   ├── DayActivity.kt     # Criadas/feitas em um dia
-│   └── TaskStore.kt       # Salvar/carregar, histórico diário + Flow de mudanças
+│   ├── AppearanceStore.kt    # Mago/Gatinho: preferência persistida e Flow
+│   ├── Task.kt               # Modelo da tarefa
+│   ├── DayActivity.kt        # Criadas/feitas em um dia
+│   └── TaskStore.kt          # Tarefas e histórico local
 └── ui/
-    ├── ChecklistApp.kt    # Navegação entre lista e atividade
-    ├── SwipeableTask.kt   # Arrastar para os lados: concluir / excluir
-    ├── ScreenHeader.kt    # Cabeçalho (título, subtítulo, ações)
-    ├── TodoScreen.kt      # Tela principal: lista, filtros, campo, menu
-    ├── ActivityScreen.kt  # Atividade: quadro de dias e totais
-    ├── TaskRow.kt         # Linha da tarefa
-    ├── EditTaskDialog.kt  # Diálogo de edição
-    ├── PixelArt.kt        # Personagem e ícones de ação
-    ├── Scenery.kt         # Cenários de ruínas (fundo)
-    ├── TaskCompletionWave.kt # Onda ao concluir uma tarefa
-    └── theme/Theme.kt     # Paleta, tipografia e formas
+    ├── ChecklistApp.kt       # Navegação: Atividade, lista e configurações
+    ├── SettingsScreen.kt     # Seletor acessível de aparência
+    ├── ActivityScreen.kt     # Companheiro, atalhos e quadro de atividade
+    ├── TodoScreen.kt         # Lista, filtros, adicionar e reordenar
+    ├── TaskRow.kt            # Checkbox, edição e menu da tarefa
+    ├── EditTaskDialog.kt     # Texto, data e horário do lembrete
+    ├── PixelArt.kt           # Companheiro de cada tema e ícones
+    ├── Scenery.kt            # Cenários de cada tema
+    ├── TaskCompletionWave.kt # Onda de pixels ao concluir pelo checkbox
+    └── theme/Theme.kt        # Paletas compartilhadas pelo app e widget
 
-app/src/main/res/
-├── drawable/              # Ícones (app, estrela, +)
-├── mipmap-anydpi-v26/     # Ícone adaptativo
-└── xml/                   # Configuração do widget
-
-.github/workflows/build.yml  # Compila o APK e publica em Releases
+app/src/test/                # Testes de persistência da aparência
+design/                      # Artes, gerador de pixel art e guia visual
+.github/workflows/build.yml  # Testa, compila, verifica e publica o APK
 ```
 
-## Requisitos
+As artes do gatinho são reproduzíveis sem bibliotecas extras:
 
-- Android **8.0** (API 26) ou superior
-- Para compilar: JDK 17 (o Gradle wrapper baixa o resto)
+```bash
+python design/generate_kitten_art.py
+```
+
+O comando gera os mesmos retângulos em **SVG**, para documentação, e
+**VectorDrawable**, para o app. Veja o [guia visual](design/README.md).
+
+</details>
+
+<div align="center">
+
+[↑ Voltar ao topo](#inicio) · [Baixar o app](https://github.com/dokitodavid/checklist/releases/latest) · [Ver o código](app/src/main/java/com/dkt/todo)
+
+</div>

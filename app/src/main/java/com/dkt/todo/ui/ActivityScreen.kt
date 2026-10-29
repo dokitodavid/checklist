@@ -24,6 +24,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -49,9 +51,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.dkt.todo.R
+import com.dkt.todo.data.AppAppearance
+import com.dkt.todo.ui.theme.LocalAppearance
 import com.dkt.todo.data.DayActivity
 import com.dkt.todo.data.TaskStore
-import com.dkt.todo.ui.theme.AshenColors
+import com.dkt.todo.ui.theme.ChecklistPalette
+import com.dkt.todo.ui.theme.LocalPalette
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -78,11 +83,11 @@ private val CellGap = 3.dp
 private val LabelWidth = 28.dp
 
 /**
- * Tela inicial: o mago em destaque, atalhos para as listas (Todas/Pendentes/Feitas)
+ * Tela inicial: o companheiro em destaque, atalhos para as listas (Todas/Pendentes/Feitas)
  * e o medidor no estilo do GitHub, com um quadrado por dia.
  */
 @Composable
-fun ActivityScreen(store: TaskStore, onOpenList: (Filter) -> Unit, onAddTask: () -> Unit) {
+fun ActivityScreen(store: TaskStore, onOpenList: (Filter) -> Unit, onAddTask: () -> Unit, onOpenSettings: () -> Unit) {
     val changes = remember { store.changes() }
     val tasks by changes.collectAsState(initial = store.load())
     val activity = remember(tasks) { store.activity() }
@@ -92,8 +97,15 @@ fun ActivityScreen(store: TaskStore, onOpenList: (Filter) -> Unit, onAddTask: ()
     val pending = tasks.count { !it.done }
     val done = tasks.count { it.done }
 
-    // Sem cabeçalho: a tela começa direto no mago (a contagem fica nos atalhos)
+    // A engrenagem abre a aparência; as contagens ficam nos atalhos.
     Scaffold(
+        topBar = {
+            ScreenHeader("Checklist", "Seu dia, no seu ritmo", showCompanion = false, actions = {
+                IconButton(onClick = onOpenSettings) {
+                    Icon(Icons.Filled.Settings, contentDescription = "Configurações")
+                }
+            })
+        },
     ) { padding ->
         Column(
             Modifier
@@ -103,8 +115,16 @@ fun ActivityScreen(store: TaskStore, onOpenList: (Filter) -> Unit, onAddTask: ()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Mago em destaque diante do cenário de ruínas, de borda a borda da tela
+            // Companheiro e cenário da aparência escolhida, de borda a borda da tela.
             HeroScene(Modifier.fullBleed(16.dp).height(300.dp))
+            if (LocalAppearance.current == AppAppearance.KITTEN) {
+                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Uma tarefa de cada vez", style = MaterialTheme.typography.titleLarge)
+                    Text("Seu gatinho te faz companhia.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ListShortcut("Todas", tasks.size, Modifier.weight(1f)) { onOpenList(Filter.ALL) }
@@ -296,15 +316,16 @@ fun heatLevel(value: Int, max: Int): Int =
     if (value <= 0 || max <= 0) 0 else ceil(value * 4.0 / max).toInt().coerceIn(1, 4)
 
 /** Cores dos níveis 0–4 do quadro (também usadas pelo widget). */
-val HeatColors = listOf(
-    AshenColors.Raised,
-    AshenColors.Ember.copy(alpha = 0.3f),
-    AshenColors.Ember.copy(alpha = 0.5f),
-    AshenColors.Ember.copy(alpha = 0.75f),
-    AshenColors.Ember,
+fun heatColors(palette: ChecklistPalette) = listOf(
+    palette.Raised,
+    palette.Ember.copy(alpha = 0.3f),
+    palette.Ember.copy(alpha = 0.5f),
+    palette.Ember.copy(alpha = 0.75f),
+    palette.Ember,
 )
 
-private fun levelColor(level: Int): Color = HeatColors[level.coerceIn(0, 4)]
+@Composable
+private fun levelColor(level: Int): Color = heatColors(LocalPalette.current)[level.coerceIn(0, 4)]
 
 /** Dias seguidos com pelo menos uma tarefa feita, até hoje (ou até ontem, se hoje ainda não teve). */
 fun streak(activity: Map<LocalDate, DayActivity>, today: LocalDate): Int {
@@ -332,13 +353,14 @@ private val HeroMageWidth = 196.dp
 @Composable
 private fun HeroScene(modifier: Modifier = Modifier) {
     val bg = MaterialTheme.colorScheme.background
+    val cute = LocalAppearance.current == AppAppearance.KITTEN
     Box(modifier, contentAlignment = Alignment.Center) {
         SceneryImage(
-            R.drawable.ruins_hero,
+            if (cute) R.drawable.kitten_garden else R.drawable.ruins_hero,
             Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
             alignment = Alignment.TopCenter,
-            alpha = 0.65f,
+            alpha = if (cute) 1f else 0.65f,
         )
         Box(
             Modifier.fillMaxSize().background(
@@ -358,8 +380,9 @@ private fun HeroScene(modifier: Modifier = Modifier) {
         )
         AshenCompanion(
             Modifier
-                .offset(x = -HeroMageWidth * 0.15f)
-                .size(HeroMageWidth, HeroMageWidth * 1.5f)
+                .offset(x = if (cute) 0.dp else -HeroMageWidth * 0.15f)
+                .size(if (cute) 240.dp else HeroMageWidth,
+                    if (cute) 240.dp else HeroMageWidth * 1.5f)
         )
     }
 }

@@ -18,6 +18,9 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.dkt.todo.data.AppAppearance
+import com.dkt.todo.ui.theme.LocalAppearance
+import com.dkt.todo.ui.theme.LocalPalette
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.pow
@@ -29,13 +32,15 @@ data class TaskCompletionEvent(val id: Int, val originInWindow: Offset)
 private data class WaveTile(val x: Float, val y: Float, val side: Float, val gray: Float, val alpha: Float)
 
 /**
- * Onda monocromática de quadradinhos que se espalha ao concluir uma tarefa (960 ms).
+ * Onda de quadradinhos nas cores do tema ao concluir uma tarefa (960 ms).
  * [event] é efêmero: cada novo id dispara a onda no check que originou a conclusão.
  * O ponto da janela é convertido para a Canvas após considerar seus insets. Decorativa: não recebe toques nem aparece para leitores de tela. Usa as
  * animações do Compose, então respeita a escala de animação do sistema (desligada = some).
  */
 @Composable
 fun TaskCompletionWave(event: TaskCompletionEvent?, modifier: Modifier = Modifier) {
+    val cute = LocalAppearance.current == AppAppearance.KITTEN
+    val accent = LocalPalette.current.Ember
     val progress = remember { Animatable(1f) }
     var viewport by remember { mutableStateOf(IntSize.Zero) }
     var canvasOriginInWindow by remember { mutableStateOf(Offset.Zero) }
@@ -93,7 +98,9 @@ fun TaskCompletionWave(event: TaskCompletionEvent?, modifier: Modifier = Modifie
             val p = (1f - abs(distance - radius) / band).coerceAtLeast(0f)
             val alpha = tile.alpha * p * p * strength
             if (alpha > 0f) {
-                drawRect(Color(tile.gray, tile.gray, tile.gray, alpha), Offset(tile.x, tile.y), Size(tile.side, tile.side))
+                val color = if (cute) accent.copy(alpha = alpha)
+                    else Color(tile.gray, tile.gray, tile.gray, alpha)
+                drawRect(color, Offset(tile.x, tile.y), Size(tile.side, tile.side))
             }
         }
     }

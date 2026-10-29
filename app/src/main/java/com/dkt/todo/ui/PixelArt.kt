@@ -20,12 +20,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.dkt.todo.R
+import com.dkt.todo.data.AppAppearance
+import com.dkt.todo.ui.theme.LocalAppearance
 
 // Os controles são discretos; a arte detalhada é o foco da identidade.
 enum class PixelSymbol { Check, Star, Trash, Plus }
@@ -46,13 +49,24 @@ fun PixelIcon(symbol: PixelSymbol, description: String?, modifier: Modifier = Mo
 /** A arte usa o relógio Compose: respeita a escala de animação e o ciclo de vida. */
 @Composable
 fun AshenCompanion(modifier: Modifier = Modifier, animated: Boolean = true, alpha: Float = 1f) {
-    val transition = if (animated) rememberInfiniteTransition(label = "Mago assassino") else null
+    val transition = if (animated) rememberInfiniteTransition(label = "Companheiro") else null
     val breath = transition?.animateFloat(
         initialValue = -1f, targetValue = 1f,
         animationSpec = infiniteRepeatable(tween(2600), RepeatMode.Reverse),
         label = "Respiração sutil",
     )
     Box(modifier) {
+        if ((LocalAppearance.current == AppAppearance.KITTEN)) {
+            Image(
+                painter = painterResource(R.drawable.kitten_companion),
+                contentDescription = "Gatinho creme em pixel art com cachecol rosa e coração",
+                modifier = Modifier.fillMaxSize().graphicsLayer {
+                    translationY = (breath?.value ?: 0f) * 1.dp.toPx()
+                    this.alpha = alpha
+                },
+                contentScale = ContentScale.Fit,
+            )
+        } else {
         Image(
             bitmap = ImageBitmap.imageResource(R.drawable.ashen_companion),
             contentDescription = "Mago assassino de capuz com adaga e uma brasa mágica",
@@ -63,5 +77,6 @@ fun AshenCompanion(modifier: Modifier = Modifier, animated: Boolean = true, alph
             contentScale = ContentScale.Fit,
             filterQuality = FilterQuality.None,
         )
+        }
     }
 }

@@ -44,7 +44,7 @@ jobs:
       - name: Compilar APK
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon -PversionCode=${{ steps.versao.outputs.codigo }} -PversionName=${{ steps.versao.outputs.nome }}
+          ./gradlew testDebugUnitTest assembleRelease lintRelease --no-daemon -PversionCode=${{ steps.versao.outputs.codigo }} -PversionName=${{ steps.versao.outputs.nome }}
           cp app/build/outputs/apk/release/app-release.apk Checklist.apk
 
       # Lista os commits desde a última release (ignora os marcados com [skip ci])

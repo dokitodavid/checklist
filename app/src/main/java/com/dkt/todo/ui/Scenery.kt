@@ -14,7 +14,10 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
 import com.dkt.todo.R
+import com.dkt.todo.data.AppAppearance
+import com.dkt.todo.ui.theme.LocalAppearance
 
 /** Arte decorativa sem suavização (pixel art nítido) e sem descrição para leitores de tela. */
 @Composable
@@ -25,6 +28,11 @@ fun SceneryImage(
     alignment: Alignment = Alignment.Center,
     alpha: Float = 1f,
 ) {
+    if (id == R.drawable.kitten_garden) {
+        Image(painterResource(id), contentDescription = null, modifier = modifier,
+            alignment = alignment, contentScale = contentScale, alpha = alpha)
+        return
+    }
     val bitmap = ImageBitmap.imageResource(id)
     val painter = remember(bitmap) { BitmapPainter(bitmap, filterQuality = FilterQuality.None) }
     Image(painter, contentDescription = null, modifier = modifier, alignment = alignment, contentScale = contentScale, alpha = alpha)
@@ -46,6 +54,10 @@ fun RuinsBackground(modifier: Modifier = Modifier) {
             layout(constraints.maxWidth, constraints.maxHeight) { placeable.place(0, 0) }
         }
     ) {
-        SceneryImage(R.drawable.ruins_tabs, Modifier.fillMaxSize(), ContentScale.Crop, alpha = 0.30f)
+        SceneryImage(
+            if ((LocalAppearance.current == AppAppearance.KITTEN)) R.drawable.kitten_garden else R.drawable.ruins_tabs,
+            Modifier.fillMaxSize(), ContentScale.Crop,
+            alpha = if ((LocalAppearance.current == AppAppearance.KITTEN)) 0.12f else 0.30f,
+        )
     }
 }

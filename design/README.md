@@ -1,67 +1,108 @@
-# Checklist · Mago assassino
+# Checklist · Mago e Gatinho
 
-Interface minimalista inspirada nos controles do ChatGPT para celular. A fantasia
-sombria fica restrita à ilustração e ao ícone. Referências de arte: Alethe Agents e
-Hermes; personagem original gerado para este app, sem reutilizar suas marcas.
+As duas aparências compartilham tarefas, navegação, lembretes e histórico no mesmo
+APK. A seleção fica em **Configurações → Aparência**, disponível pela engrenagem
+da Atividade ou pelo menu ⋮ da lista. A preferência é salva em `AppearanceStore`,
+separada dos dados de tarefas; instalações existentes começam no Mago.
 
-## Interface
+## Interface e interação
 
-- Fundo neutro `#212121`, campo e filtros `#303030`.
-- Texto `#ECECEC`, texto secundário `#A0A0A0`, contornos `#454545`.
-- Fonte sans-serif do sistema, controles arredondados, campo em cápsula e envio circular.
-- Tarefas em linhas sem cartões; arrastar para os lados conclui/exclui, segurar e arrastar
-  reordena, e editar/favoritar/excluir também ficam no menu ⋮.
-- Tarefas importantes ganham uma pequena estrela neutra; a ordem é manual.
-- Concluídas têm check cinza e texto riscado, e ficam no fim da lista, sem título de seção.
-- Sem cabeçalho medieval, texto de jornada, painel de progresso ou verde na interface.
+- Fonte sans-serif do sistema, controles arredondados e campo em cápsula.
+- Tarefas em linhas, com checkbox à esquerda e menu ⋮ à direita.
+- Concluir/reabrir pelo checkbox; excluir pelo menu, com Desfazer.
+- Sem gestos horizontais para concluir ou excluir em nenhum tema.
+- Segurar e arrastar reordena as pendentes. Concluídas ficam no fim.
+- Configurações usa um grupo de seleção com papel de radio button, rótulos e
+  indicação textual “Em uso”; a seleção não depende apenas de cor.
+- O app, as barras do sistema e o widget acompanham a aparência salva.
 
-## Arte e movimento
+## Tema Mago
 
-`companion.png` (no app, `ashen_companion.png`) é o mago de capuz, adaga e brasa mágica,
-com transparência e detalhe em pixel art de alta resolução. `checklist-icon.png` e
-`favicon.png` contêm o retrato do capuz. O launcher usa retrato adaptativo e variante
-monocromática própria. O mago respira com um movimento discreto de 1 dp.
+Interface neutra e escura, com fantasia na ilustração e no cenário.
 
-**Cenários** (`app/src/main/res/drawable-nodpi/`, em WebP, desenhados sem suavização):
+| Uso | Cor |
+|---|---|
+| Fundo | `#212121` |
+| Superfícies | `#303030` |
+| Texto | `#ECECEC` |
+| Texto secundário | `#A0A0A0` |
+| Contorno | `#454545` |
+| Atividade | `#F2A541` |
 
-- `ruins_hero.webp` — tela principal (Atividade): novo cenário quadrado com torres estendidas
-  acima do capuz, com 65% de opacidade, preenchendo toda a área do mago com Crop e TopCenter.
-  O topo tem um fade curto nos primeiros 6% (18 dp na área de 300 dp), removendo a
-  borda reta sem criar uma faixa vazia; o fade inferior ocupa os últimos 18% e o lateral,
-  4%. O cenário termina antes dos atalhos Todas/Pendentes/Feitas.
-  A capa do mago é assimétrica, então só o mago é deslocado 15% da própria largura para a
-  esquerda, deixando capuz e tronco no eixo da tela e do portal da catedral.
-- `ruins_tabs.webp` — listas: papel de parede na tela inteira, atrás do cabeçalho e da lista
-  (Crop central), com 30% de opacidade. Não se move nem muda de tamanho ao abrir a tela ou
-  quando o teclado sobe; a lista rola na frente. Componente `RuinsBackground` em `Scenery.kt`.
-- `ruins_widget_bg.webp` — widget: cenário horizontal da versão anterior, menor e já esmaecido
-  (25% sobre o cinza `#212121`), para não aplicar transparência ao widget inteiro. O widget
-  não tem personagem nem brasas; mostra o quadro de atividade e o botão de adicionar.
+`companion.png` (`ashen_companion.png` no app) é o mago de capuz, adaga e brasa,
+com transparência e detalhe em pixel art. `checklist-icon.png` e `favicon.png`
+contêm o retrato do capuz; o launcher mantém seu ícone adaptativo e monocromático.
+Referências originais: Alethe Agents e Hermes, sem reutilizar suas marcas.
 
-**Onda de conclusão** (`TaskCompletionWave.kt`): ao concluir uma tarefa pendente, uma onda
-monocromática de quadradinhos cinza nasce no centro do check acionado e se espalha
-pela tela em 960 ms. A origem é capturada em coordenadas da janela antes de a linha
-se mover/sumir e convertida para a Canvas considerando os insets; por gesto, usa
-o check de confirmação visível no fundo da mesma linha (o checkbox da frente já
-está saindo da tela nesse momento). Só dispara na ação de
-concluir (checkbox ou arrastar para a direita): não ao abrir o app, reabrir, desfazer ou
-navegar. Conclusões seguidas reiniciam a onda. Não recebe toques, não aparece para leitores
-de tela, fica fora das barras do sistema e do teclado e respeita a escala de animação do
-Android (com animações desligadas, não aparece). Sem som, vibração ou flash.
+Os cenários em `drawable-nodpi/` continuam os originais:
 
-Todas as imagens são locais. Para uma interface web, copie `favicon.png` para
-seus arquivos públicos e use `<link rel="icon" href="/favicon.png" type="image/png">`.
+- `ruins_hero.webp`: Atividade, Crop/TopCenter, 65% de opacidade, fades nas bordas.
+- `ruins_tabs.webp`: papel de parede fixo nas listas, com 30% de opacidade.
+- `ruins_widget_bg.webp`: fundo já esmaecido para o widget, sem personagem.
 
-## Compilação e validação
+O mago tem largura de 196 dp e deslocamento de 15% à esquerda para compensar a capa
+assimétrica. A composição da tela inicial mantém o cenário de 300 dp e agora inclui
+um cabeçalho com acesso às configurações.
+
+## Tema Gatinho
+
+Um gatinho creme com cachecol rosa, bochechas, cauda enrolada e coração, diante de
+uma janela com nuvens e vasinhos de flores.
+
+| Uso | Cor |
+|---|---|
+| Fundo | `#FFF8F4` |
+| Superfícies | `#F6E7ED` |
+| Texto | `#503846` |
+| Texto secundário | `#7E606F` |
+| Contorno | `#E6C9D4` |
+| Controles principais | `#9C4566` |
+| Atividade / onda | `#B4557B` |
+
+O gatinho é centralizado em uma área de 240 × 240 dp, sem a compensação da capa do
+mago. O cenário da Atividade tem 100% de opacidade com fades, e o das listas fica
+em 12%, preservando a leitura. O widget recebe uma versão já esmaecida do jardim.
+
+### Arte reproduzível
+
+`generate_kitten_art.py` descreve os desenhos com retângulos de coordenadas inteiras:
+
+- `kitten_companion`: grade de 48 × 48.
+- `kitten_garden`: grade de 96 × 96.
+- `kitten_widget_bg`: cenário com as cores misturadas a 12% sobre o fundo creme.
+
+O mesmo comando gera os SVGs desta pasta e os VectorDrawables de `res/drawable/`:
 
 ```bash
-./gradlew assembleRelease lintRelease
+python design/generate_kitten_art.py
 ```
 
-Validação em celular/emulador pendente: centralização do mago e recorte do cenário em telas
-de larguras diferentes, legibilidade das listas sobre o cenário, teclado, fontes ampliadas,
-TalkBack, desfazer, atualização entre app e widget, widget estreito e largo, onda de
-conclusão (seguidas e com animações desativadas).
-A prévia gerada por imagem é ilustrativa, não uma captura de execução.
+Sem dependências extras. A arte é local, original e vetorial; não há downloads no
+app. O ícone do launcher continua o original nos dois temas.
 
-Compilação release, lint (sem erros) e assinatura do APK verificados.
+## Movimento
+
+Os dois companheiros respiram com movimento de 1 dp usando o relógio Compose.
+A onda de conclusão (`TaskCompletionWave.kt`) nasce no centro do checkbox e dura
+960 ms, em cinza no Mago e rosa no Gatinho.
+
+A origem é capturada em coordenadas da janela antes de a linha mudar de posição e
+convertida para a Canvas considerando os insets. Só dispara ao concluir pelo
+checkbox, não ao reabrir, trocar tema, restaurar o app ou navegar. Conclusões seguidas
+reiniciam a onda. Ela não recebe toques nem aparece para leitores de tela, fica fora
+das barras e do teclado e respeita a escala de animação do Android.
+
+## Validação
+
+```bash
+./gradlew testDebugUnitTest assembleRelease lintRelease
+```
+
+Os testes verificam o tema inicial, persistência ao reabrir, retorno ao Mago,
+fallback para preferência desconhecida, leitura do tema pelo Flow e preservação
+das preferências de tarefas.
+
+A galeria no README mostra os assets do projeto, não capturas de execução.
+Validação em aparelho/emulador continua necessária para os dois temas: recorte e
+centralização, teclado, fontes ampliadas, TalkBack, reordenar, Desfazer, lembretes,
+widget estreito/largo, troca de tema com widgets existentes e animações desligadas.

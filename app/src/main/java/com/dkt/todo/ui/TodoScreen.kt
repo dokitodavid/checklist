@@ -100,6 +100,7 @@ fun TodoScreen(
     onFilterChange: (Filter) -> Unit,
     focusTick: Int = 0,
     onBack: () -> Unit = {},
+    onOpenSettings: () -> Unit = {},
     onTaskCompleted: (Offset) -> Unit = {},
 ) {
     var tasks by remember { mutableStateOf(store.load()) }
@@ -111,7 +112,7 @@ fun TodoScreen(
     val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
-    // Ler a posição só no toque: LayoutCoordinates inclui rolagem e translação do gesto.
+    // Ler a posição só no toque: LayoutCoordinates inclui a posição atual na rolagem.
     // Não é estado de UI: registrar o layout não deve recompor a lista.
     val checkCoordinates = remember { mutableMapOf<Long, LayoutCoordinates>() }
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
@@ -172,9 +173,9 @@ fun TodoScreen(
         undoable("Tarefa excluída", listOf(task))
     }
 
-    fun toggle(task: Task, gestureOrigin: Offset? = null) {
+    fun toggle(task: Task) {
         // Capturar antes de salvar/reordenar/remover a linha concluída do filtro.
-        val checkOrigin = gestureOrigin ?: checkCoordinates[task.id]?.takeIf { it.isAttached }?.let { coordinates ->
+        val checkOrigin = checkCoordinates[task.id]?.takeIf { it.isAttached }?.let { coordinates ->
             coordinates.localToWindow(Offset(coordinates.size.width / 2f, coordinates.size.height / 2f))
         }
         if (!task.done && checkOrigin != null) onTaskCompleted(checkOrigin)
@@ -268,6 +269,10 @@ fun TodoScreen(
                             Icon(Icons.Filled.MoreVert, contentDescription = "Mais opções")
                         }
                         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Configurações") },
+                                onClick = { menuOpen = false; onOpenSettings() },
+                            )
                             DropdownMenuItem(
                                 text = { Text("Limpar concluídas") },
                                 enabled = tasks.any { it.done },
@@ -376,29 +381,21 @@ fun TodoScreen(
                                 onDragStarted = { haptics.performHapticFeedback(HapticFeedbackType.LongPress) },
                                 onDragStopped = { update(tasks) },
                             )
-                            Column {
-                                SwipeableTask(
-                                    task = task,
-                                    onToggle = { origin -> toggle(task, gestureOrigin = origin) },
-                                    onDelete = { delete(task) },
-                                ) {
-                                    TaskRow(
-                                        task = task,
-                                        onToggle = { toggle(task) },
-                                        onStar = {
-                                            update(tasks.map { if (it.id == task.id) it.copy(important = !it.important) else it })
-                                        },
-                                        onEdit = { editing = task },
-                                        onDelete = { delete(task) },
-                                        dragging = dragging,
-                                        onCheckPositioned = { coordinates ->
-                                            if (coordinates != null) checkCoordinates[task.id] = coordinates
-                                            else checkCoordinates.remove(task.id)
-                                        },
-                                        modifier = dragHandle,
-                                    )
-                                }
-                            }
+                            TaskRow(
+                                task = task,
+                                onToggle = { toggle(task) },
+                                onStar = {
+                                    update(tasks.map { if (it.id == task.id) it.copy(important = !it.important) else it })
+                                },
+                                onEdit = { editing = task },
+                                onDelete = { delete(task) },
+                                dragging = dragging,
+                                onCheckPositioned = { coordinates ->
+                                    if (coordinates != null) checkCoordinates[task.id] = coordinates
+                                    else checkCoordinates.remove(task.id)
+                                },
+                                modifier = if (!task.done && filter != Filter.DONE) dragHandle else Modifier,
+                            )
                         }
                     }
                 }
